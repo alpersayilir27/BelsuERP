@@ -162,3 +162,6 @@ C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.API\obj\Deb
 C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.API\obj\Debug\net10.0\PosetERP.API.genruntimeconfig.cache
 C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.API\obj\Debug\net10.0\ref\PosetERP.API.dll
 C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.API\obj\Debug\net10.0\PosetERP.API.sourcelink.json
+C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.API\bin\Debug\net10.0\Swashbuckle.AspNetCore.Swagger.dll
+C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.API\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.API\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerUI.dll
