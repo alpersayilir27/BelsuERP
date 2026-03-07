@@ -9,3 +9,4 @@ C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Domain\obj\
 C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Domain\obj\Debug\net10.0\refint\PosetERP.Domain.dll
 C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Domain\obj\Debug\net10.0\PosetERP.Domain.pdb
 C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Domain\obj\Debug\net10.0\ref\PosetERP.Domain.dll
+C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Domain\obj\Debug\net10.0\PosetERP.Domain.sourcelink.json

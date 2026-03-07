@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using PosetERP.Application.Interfaces;
+using PosetERP.Application.Services;
 using PosetERP.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,6 +8,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IProductionService, ProductionService>();
 
 builder.Services.AddOpenApi();
 

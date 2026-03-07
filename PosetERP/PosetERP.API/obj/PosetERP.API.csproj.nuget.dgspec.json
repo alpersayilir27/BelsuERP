@@ -533,6 +533,9 @@
             "projectReferences": {
               "C:\\Users\\Alper\\Desktop\\PoşetÜretimTakipProgramı\\PosetERP\\PosetERP.Domain\\PosetERP.Domain.csproj": {
                 "projectPath": "C:\\Users\\Alper\\Desktop\\PoşetÜretimTakipProgramı\\PosetERP\\PosetERP.Domain\\PosetERP.Domain.csproj"
+              },
+              "C:\\Users\\Alper\\Desktop\\PoşetÜretimTakipProgramı\\PosetERP\\PosetERP.Infrastructure\\PosetERP.Infrastructure.csproj": {
+                "projectPath": "C:\\Users\\Alper\\Desktop\\PoşetÜretimTakipProgramı\\PosetERP\\PosetERP.Infrastructure\\PosetERP.Infrastructure.csproj"
               }
             }
           }
@@ -1213,9 +1216,6 @@
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "C:\\Users\\Alper\\Desktop\\PoşetÜretimTakipProgramı\\PosetERP\\PosetERP.Application\\PosetERP.Application.csproj": {
-                "projectPath": "C:\\Users\\Alper\\Desktop\\PoşetÜretimTakipProgramı\\PosetERP\\PosetERP.Application\\PosetERP.Application.csproj"
-              },
               "C:\\Users\\Alper\\Desktop\\PoşetÜretimTakipProgramı\\PosetERP\\PosetERP.Domain\\PosetERP.Domain.csproj": {
                 "projectPath": "C:\\Users\\Alper\\Desktop\\PoşetÜretimTakipProgramı\\PosetERP\\PosetERP.Domain\\PosetERP.Domain.csproj"
               }

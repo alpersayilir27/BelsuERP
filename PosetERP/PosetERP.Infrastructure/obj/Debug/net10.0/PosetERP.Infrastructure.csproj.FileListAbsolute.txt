@@ -2,9 +2,7 @@ C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Infrastruct
 C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Infrastructure\bin\Debug\net10.0\PosetERP.Infrastructure.runtimeconfig.json
 C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Infrastructure\bin\Debug\net10.0\PosetERP.Infrastructure.dll
 C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Infrastructure\bin\Debug\net10.0\PosetERP.Infrastructure.pdb
-C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Infrastructure\bin\Debug\net10.0\PosetERP.Application.dll
 C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Infrastructure\bin\Debug\net10.0\PosetERP.Domain.dll
-C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Infrastructure\bin\Debug\net10.0\PosetERP.Application.pdb
 C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Infrastructure\bin\Debug\net10.0\PosetERP.Domain.pdb
 C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Infrastructure\obj\Debug\net10.0\PosetERP.Infrastructure.csproj.AssemblyReference.cache
 C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Infrastructure\obj\Debug\net10.0\PosetERP.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
@@ -17,3 +15,4 @@ C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Infrastruct
 C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Infrastructure\obj\Debug\net10.0\PosetERP.Infrastructure.pdb
 C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Infrastructure\obj\Debug\net10.0\PosetERP.Infrastructure.genruntimeconfig.cache
 C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Infrastructure\obj\Debug\net10.0\ref\PosetERP.Infrastructure.dll
+C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Infrastructure\obj\Debug\net10.0\PosetERP.Infrastructure.sourcelink.json

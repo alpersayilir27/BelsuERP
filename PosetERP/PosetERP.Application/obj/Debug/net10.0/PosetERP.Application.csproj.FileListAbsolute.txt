@@ -13,3 +13,6 @@ C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Application
 C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Application\obj\Debug\net10.0\refint\PosetERP.Application.dll
 C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Application\obj\Debug\net10.0\PosetERP.Application.pdb
 C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Application\obj\Debug\net10.0\ref\PosetERP.Application.dll
+C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Application\bin\Debug\net10.0\PosetERP.Infrastructure.dll
+C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Application\bin\Debug\net10.0\PosetERP.Infrastructure.pdb
+C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Application\obj\Debug\net10.0\PosetERP.Application.sourcelink.json

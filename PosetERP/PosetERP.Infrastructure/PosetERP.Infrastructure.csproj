@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\PosetERP.Application\PosetERP.Application.csproj" />
     <ProjectReference Include="..\PosetERP.Domain\PosetERP.Domain.csproj" />
   </ItemGroup>
 

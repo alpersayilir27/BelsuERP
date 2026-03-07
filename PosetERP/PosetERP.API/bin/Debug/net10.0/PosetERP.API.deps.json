@@ -753,7 +753,8 @@
       },
       "PosetERP.Application/1.0.0": {
         "dependencies": {
-          "PosetERP.Domain": "1.0.0"
+          "PosetERP.Domain": "1.0.0",
+          "PosetERP.Infrastructure": "1.0.0"
         },
         "runtime": {
           "PosetERP.Application.dll": {
@@ -775,7 +776,6 @@
           "Microsoft.EntityFrameworkCore": "10.0.0-preview.1.25081.1",
           "Microsoft.EntityFrameworkCore.Design": "10.0.0-preview.1.25081.1",
           "Microsoft.EntityFrameworkCore.SqlServer": "10.0.0-preview.1.25081.1",
-          "PosetERP.Application": "1.0.0",
           "PosetERP.Domain": "1.0.0"
         },
         "runtime": {
