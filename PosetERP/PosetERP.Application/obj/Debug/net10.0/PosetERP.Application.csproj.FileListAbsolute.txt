@@ -1,0 +1,15 @@
+C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Application\bin\Debug\net10.0\PosetERP.Application.deps.json
+C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Application\bin\Debug\net10.0\PosetERP.Application.dll
+C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Application\bin\Debug\net10.0\PosetERP.Application.pdb
+C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Application\bin\Debug\net10.0\PosetERP.Domain.dll
+C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Application\bin\Debug\net10.0\PosetERP.Domain.pdb
+C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Application\obj\Debug\net10.0\PosetERP.Application.csproj.AssemblyReference.cache
+C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Application\obj\Debug\net10.0\PosetERP.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Application\obj\Debug\net10.0\PosetERP.Application.AssemblyInfoInputs.cache
+C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Application\obj\Debug\net10.0\PosetERP.Application.AssemblyInfo.cs
+C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Application\obj\Debug\net10.0\PosetERP.Application.csproj.CoreCompileInputs.cache
+C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Application\obj\Debug\net10.0\PosetERP.884CB698.Up2Date
+C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Application\obj\Debug\net10.0\PosetERP.Application.dll
+C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Application\obj\Debug\net10.0\refint\PosetERP.Application.dll
+C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Application\obj\Debug\net10.0\PosetERP.Application.pdb
+C:\Users\Alper\Desktop\PoşetÜretimTakipProgramı\PosetERP\PosetERP.Application\obj\Debug\net10.0\ref\PosetERP.Application.dll

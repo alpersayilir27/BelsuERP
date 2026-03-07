@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="PosetERP.API/PosetERP.API.csproj" />
+  <Project Path="PosetERP.Application/PosetERP.Application.csproj" />
+  <Project Path="PosetERP.Domain/PosetERP.Domain.csproj" />
+  <Project Path="PosetERP.Infrastructure/PosetERP.Infrastructure.csproj" />
+</Solution>
