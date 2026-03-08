@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PosetERP.Application")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2ad43a20e3c604b99b03661da1ed104500194b26")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+da2bb3cce2626e2cc2649667cec27d363156c9ee")]
 [assembly: System.Reflection.AssemblyProductAttribute("PosetERP.Application")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PosetERP.Application")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

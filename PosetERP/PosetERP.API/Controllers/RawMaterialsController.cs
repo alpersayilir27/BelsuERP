@@ -53,4 +53,59 @@ public class RawMaterialsController : ControllerBase
             return StatusCode(500, new { Error = "An unexpected error occurred: " + ex.Message });
         }
     }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateRawMaterial(Guid id, [FromBody] RawMaterial updateDto)
+    {
+        try
+        {
+            if (id != updateDto.Id)
+            {
+                return BadRequest("ID mismatch");
+            }
+
+            var material = await _context.RawMaterials.FindAsync(id);
+            if (material == null)
+            {
+                return NotFound();
+            }
+
+            if (string.IsNullOrWhiteSpace(updateDto.Name))
+            {
+                return BadRequest("Material Name is required.");
+            }
+
+            material.Name = updateDto.Name;
+            material.StockKg = updateDto.StockKg;
+            material.MinimumStockAlert = updateDto.MinimumStockAlert;
+
+            await _context.SaveChangesAsync();
+            return Ok(material);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { Error = "An unexpected error occurred: " + ex.Message });
+        }
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteRawMaterial(Guid id)
+    {
+        try
+        {
+            var material = await _context.RawMaterials.FindAsync(id);
+            if (material == null)
+            {
+                return NotFound();
+            }
+
+            _context.RawMaterials.Remove(material);
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { Error = "An unexpected error occurred: " + ex.Message });
+        }
+    }
 }

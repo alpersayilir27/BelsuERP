@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Package, AlertCircle, X, Loader2, Scale } from "lucide-react";
+import { Plus, Package, AlertCircle, X, Loader2, Scale, Pencil, Trash2 } from "lucide-react";
 
 interface RawMaterial {
-  id: number;
+  id: string;
   name: string;
   stockKg: number;
   minimumStockAlert: number;
@@ -17,6 +17,7 @@ export default function HammaddePage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     stockAmount: "",
@@ -55,30 +56,86 @@ export default function HammaddePage() {
 
     try {
       setIsSubmitting(true);
-      const response = await fetch("http://localhost:5257/api/RawMaterials", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      
+      let url = "http://localhost:5257/api/RawMaterials";
+      let method = "POST";
+      let payload: any = {
+        name: formData.name,
+        stockKg: Number(formData.stockAmount) || 0,
+        minimumStockAlert: Number(formData.criticalStockLevel) || 0,
+      };
+
+      if (editingId) {
+        url = `http://localhost:5257/api/RawMaterials/${editingId}`;
+        method = "PUT";
+        payload = {
+          id: editingId,
           name: formData.name,
           stockKg: Number(formData.stockAmount) || 0,
           minimumStockAlert: Number(formData.criticalStockLevel) || 0,
-        }),
+        };
+        console.log("PUT İsteği İçin Giden Payload:", payload);
+      } else {
+        console.log("POST İsteği İçin Giden Payload:", payload);
+      }
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
-        throw new Error("Hammadde eklenirken bir hata oluştu.");
+        const errorText = await response.text();
+        console.error("Backend Hatası:", errorText);
+        throw new Error(`Hammadde ${editingId ? "güncellenirken" : "eklenirken"} bir hata oluştu: ${errorText}`);
       }
 
-      setIsModalOpen(false);
-      setFormData({ name: "", stockAmount: "", criticalStockLevel: "" });
+      closeModal();
       await fetchMaterials();
     } catch (err: any) {
-      alert(err.message || "Ekleme başarısız oldu.");
+      console.error("Catch Hatası:", err);
+      alert(err.message || "İşlem başarısız oldu.");
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleEdit = (material: RawMaterial) => {
+    setEditingId(material.id);
+    setFormData({
+      name: material.name,
+      stockAmount: material.stockKg.toString(),
+      criticalStockLevel: material.minimumStockAlert.toString(),
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (id: string, name: string) => {
+    if (!window.confirm(`'${name}' hammaddesini silmek istediğinize emin misiniz?`)) return;
+
+    try {
+      const response = await fetch(`http://localhost:5257/api/RawMaterials/${id}`, {
+        method: "DELETE"
+      });
+
+      if (!response.ok) {
+        throw new Error("Hammadde silinirken bir hata oluştu.");
+      }
+
+      await fetchMaterials();
+    } catch (err: any) {
+      alert(err.message || "Silme işlemi başarısız oldu.");
+    }
+  };
+
+  const closeModal = () => {
+    if (isSubmitting) return;
+    setIsModalOpen(false);
+    setEditingId(null);
+    setFormData({ name: "", stockAmount: "", criticalStockLevel: "" });
   };
 
   return (
@@ -133,6 +190,7 @@ export default function HammaddePage() {
                   <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">Mevcut Stok (Kg)</th>
                   <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">Kritik Sınır (Kg)</th>
                   <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider text-center">Durum</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">İşlemler</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#222]">
@@ -180,6 +238,24 @@ export default function HammaddePage() {
                           </span>
                         )}
                       </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => handleEdit(material)}
+                            className="text-slate-400 hover:text-amber-400 transition-colors p-1.5 rounded-lg hover:bg-amber-400/10 hover:shadow-[0_0_10px_rgba(251,191,36,0.2)]"
+                            title="Düzenle"
+                          >
+                            <Pencil size={16} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(material.id, material.name)}
+                            className="text-slate-400 hover:text-rose-400 transition-colors p-1.5 rounded-lg hover:bg-rose-400/10 hover:shadow-[0_0_10px_rgba(244,63,94,0.2)]"
+                            title="Sil"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   );
                 })}
@@ -194,15 +270,17 @@ export default function HammaddePage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
           <div 
             className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
-            onClick={() => !isSubmitting && setIsModalOpen(false)}
+            onClick={closeModal}
           />
           
           <div className="relative bg-[#111111] border border-[#222] rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-[#222] bg-[#151515]">
-              <h3 className="text-lg font-semibold text-white">Yeni Hammadde Ekle</h3>
+              <h3 className="text-lg font-semibold text-white">
+                {editingId ? "Hammadde Düzenle" : "Yeni Hammadde Ekle"}
+              </h3>
               <button 
-                onClick={() => setIsModalOpen(false)}
+                onClick={closeModal}
                 disabled={isSubmitting}
                 className="text-slate-400 hover:text-white transition-colors bg-transparent border-none p-1 rounded-md hover:bg-[#222]"
               >
@@ -283,7 +361,7 @@ export default function HammaddePage() {
               <div className="pt-4 flex items-center justify-end gap-3 border-t border-[#222]">
                 <button
                   type="button"
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={closeModal}
                   disabled={isSubmitting}
                   className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-[#222] rounded-xl transition-colors"
                 >
