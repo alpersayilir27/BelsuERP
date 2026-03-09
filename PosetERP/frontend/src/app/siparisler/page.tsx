@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { authFetch } from "../../lib/authFetch";
 import { Plus, ShoppingCart, Calendar, AlertCircle, X, Loader2, Play } from "lucide-react";
 
 interface Order {
@@ -13,6 +15,7 @@ interface Order {
   dimensions: string | null;
   thicknessMicron: number;
   requestedAmountKg: number;
+  totalPrice: number;
   status: string;
 }
 
@@ -31,6 +34,8 @@ export default function SiparislerPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isStartingProduction, setIsStartingProduction] = useState<string | null>(null);
+  
+  const [confirmModalState, setConfirmModalState] = useState<{ isOpen: boolean, orderId: string | null }>({ isOpen: false, orderId: null });
 
   const [formData, setFormData] = useState({
     customerId: "",
@@ -38,8 +43,11 @@ export default function SiparislerPage() {
     dimensions: "",
     thicknessMicron: "",
     requestedAmountKg: "",
+    totalPrice: "",
     targetDeliveryDate: "",
   });
+  
+  const router = useRouter();
 
   const bagTypes = [
     { value: "0", label: "Baskılı" },
@@ -53,8 +61,8 @@ export default function SiparislerPage() {
       setLoading(true);
       
       const [ordersRes, customersRes] = await Promise.all([
-        fetch("http://localhost:5257/api/Orders"),
-        fetch("http://localhost:5257/api/Customers")
+        authFetch("http://localhost:5257/api/Orders"),
+        authFetch("http://localhost:5257/api/Customers")
       ]);
 
       if (!ordersRes.ok || !customersRes.ok) {
@@ -75,8 +83,15 @@ export default function SiparislerPage() {
   };
 
   useEffect(() => {
+    // Role Guard
+    const userRole = localStorage.getItem("userRole");
+    if (userRole === "Usta") {
+      router.push("/uretim");
+      return;
+    }
+    
     fetchData();
-  }, []);
+  }, [router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -89,7 +104,7 @@ export default function SiparislerPage() {
 
     try {
       setIsSubmitting(true);
-      const response = await fetch("http://localhost:5257/api/Orders", {
+      const response = await authFetch("http://localhost:5257/api/Orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -99,6 +114,7 @@ export default function SiparislerPage() {
           dimensions: formData.dimensions,
           thicknessMicron: Number(formData.thicknessMicron) || 0,
           requestedAmountKg: Number(formData.requestedAmountKg) || 0,
+          totalPrice: Number(formData.totalPrice) || 0,
         }),
       });
 
@@ -113,6 +129,7 @@ export default function SiparislerPage() {
         dimensions: "",
         thicknessMicron: "",
         requestedAmountKg: "",
+        totalPrice: "",
         targetDeliveryDate: "",
       });
       await fetchData();
@@ -123,12 +140,14 @@ export default function SiparislerPage() {
     }
   };
 
-  const handleStartProduction = async (orderId: string) => {
-    if (!confirm("Siparişi üretime almak istediğinize emin misiniz?")) return;
+  const executeStartProduction = async () => {
+    const orderId = confirmModalState.orderId;
+    if (!orderId) return;
     
     try {
+      setConfirmModalState({ isOpen: false, orderId: null });
       setIsStartingProduction(orderId);
-      const response = await fetch(`http://localhost:5257/api/Orders/${orderId}/start-production`, {
+      const response = await authFetch(`http://localhost:5257/api/Orders/${orderId}/start-production`, {
         method: "POST"
       });
 
@@ -227,6 +246,7 @@ export default function SiparislerPage() {
                   <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Müşteri</th>
                   <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Poşet Tipi / Ebat</th>
                   <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">Miktar (Kg)</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">Tutar</th>
                   <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Teslim Tarihi</th>
                   <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider text-center">Durum</th>
                   <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">İşlem</th>
@@ -257,6 +277,11 @@ export default function SiparislerPage() {
                         {order.requestedAmountKg.toLocaleString('tr-TR')}
                       </span>
                     </td>
+                    <td className="px-6 py-4 text-right">
+                      <span className="text-sm font-bold text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]">
+                        {order.totalPrice ? order.totalPrice.toLocaleString('tr-TR') : "0"} ₺
+                      </span>
+                    </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2 text-slate-300">
                         <Calendar size={14} className="text-slate-500" />
@@ -271,7 +296,7 @@ export default function SiparislerPage() {
                     <td className="px-6 py-4 text-right">
                       {order.status === "Pending" && (
                         <button
-                          onClick={() => handleStartProduction(order.id)}
+                          onClick={() => setConfirmModalState({ isOpen: true, orderId: order.id })}
                           disabled={isStartingProduction === order.id}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-cyan-500/10 hover:bg-cyan-500 text-cyan-400 hover:text-[#050505] text-xs font-semibold rounded-lg border border-cyan-500/30 hover:border-transparent transition-all shadow-[0_0_10px_rgba(6,182,212,0.1)] hover:shadow-[0_0_15px_rgba(6,182,212,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
                         >
@@ -416,6 +441,30 @@ export default function SiparislerPage() {
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 gap-4">
+                <div className="space-y-2">
+                  <label htmlFor="totalPrice" className="text-sm font-medium text-slate-300">
+                    Toplam Tutar (₺)
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      id="totalPrice"
+                      name="totalPrice"
+                      min="0"
+                      step="0.01"
+                      value={formData.totalPrice}
+                      onChange={handleInputChange}
+                      className="w-full bg-[#0A0A0A] border border-[#333] rounded-xl pl-4 pr-10 py-2.5 text-emerald-400 font-bold text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 focus:shadow-[0_0_15px_rgba(16,185,129,0.2)] transition-all placeholder:text-emerald-900/50"
+                      placeholder="0.00"
+                    />
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-emerald-500 font-semibold">
+                      ₺
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Modal Actions */}
               <div className="pt-4 mt-2 flex items-center justify-end gap-3 border-t border-[#222]">
                 <button
@@ -442,6 +491,38 @@ export default function SiparislerPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* CONFIRM MODAL */}
+      {confirmModalState.isOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity"
+            onClick={() => setConfirmModalState({ isOpen: false, orderId: null })}
+          />
+          <div className="relative bg-[#111111] border border-[#333] rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.8)] w-full max-w-sm px-6 py-8 text-center animate-in zoom-in-95 duration-200">
+            <div className="mx-auto w-16 h-16 rounded-full bg-cyan-500/10 flex items-center justify-center mb-6 border border-cyan-500/30">
+              <Play size={28} className="text-cyan-400 translate-x-0.5" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Üretime Al</h3>
+            <p className="text-sm text-slate-400 mb-8">Bu siparişi onaylıyor ve üretim panosuna (Makinede) aktarmak istediğinize emin misiniz?</p>
+            
+            <div className="flex gap-3 w-full">
+              <button
+                onClick={() => setConfirmModalState({ isOpen: false, orderId: null })}
+                className="flex-1 py-3 bg-transparent text-slate-300 hover:text-white hover:bg-[#222] font-medium rounded-xl border border-[#333] transition-colors"
+              >
+                İptal Et
+              </button>
+              <button
+                onClick={executeStartProduction}
+                className="flex-1 py-3 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-all"
+              >
+                Onayla
+              </button>
+            </div>
           </div>
         </div>
       )}

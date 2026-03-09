@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { authFetch } from "../../lib/authFetch";
 import { Plus, Package, AlertCircle, X, Loader2, Scale, Pencil, Trash2 } from "lucide-react";
 
 interface RawMaterial {
@@ -8,6 +9,7 @@ interface RawMaterial {
   name: string;
   stockKg: number;
   minimumStockAlert: number;
+  category: string;
 }
 
 export default function HammaddePage() {
@@ -22,12 +24,13 @@ export default function HammaddePage() {
     name: "",
     stockAmount: "",
     criticalStockLevel: "",
+    category: "Granül",
   });
 
   const fetchMaterials = async () => {
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:5257/api/RawMaterials");
+      const response = await authFetch("http://localhost:5257/api/RawMaterials");
       if (!response.ok) {
         throw new Error("Hammadde verileri alınırken bir hata oluştu.");
       }
@@ -63,6 +66,7 @@ export default function HammaddePage() {
         name: formData.name,
         stockKg: Number(formData.stockAmount) || 0,
         minimumStockAlert: Number(formData.criticalStockLevel) || 0,
+        category: formData.category,
       };
 
       if (editingId) {
@@ -73,13 +77,14 @@ export default function HammaddePage() {
           name: formData.name,
           stockKg: Number(formData.stockAmount) || 0,
           minimumStockAlert: Number(formData.criticalStockLevel) || 0,
+          category: formData.category,
         };
         console.log("PUT İsteği İçin Giden Payload:", payload);
       } else {
         console.log("POST İsteği İçin Giden Payload:", payload);
       }
 
-      const response = await fetch(url, {
+      const response = await authFetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
@@ -109,6 +114,7 @@ export default function HammaddePage() {
       name: material.name,
       stockAmount: material.stockKg.toString(),
       criticalStockLevel: material.minimumStockAlert.toString(),
+      category: material.category || "Granül",
     });
     setIsModalOpen(true);
   };
@@ -117,7 +123,7 @@ export default function HammaddePage() {
     if (!window.confirm(`'${name}' hammaddesini silmek istediğinize emin misiniz?`)) return;
 
     try {
-      const response = await fetch(`http://localhost:5257/api/RawMaterials/${id}`, {
+      const response = await authFetch(`http://localhost:5257/api/RawMaterials/${id}`, {
         method: "DELETE"
       });
 
@@ -135,7 +141,7 @@ export default function HammaddePage() {
     if (isSubmitting) return;
     setIsModalOpen(false);
     setEditingId(null);
-    setFormData({ name: "", stockAmount: "", criticalStockLevel: "" });
+    setFormData({ name: "", stockAmount: "", criticalStockLevel: "", category: "Granül" });
   };
 
   return (
@@ -187,6 +193,7 @@ export default function HammaddePage() {
               <thead>
                 <tr className="bg-[#0A0A0A] border-b border-[#222]">
                   <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Hammadde Adı</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Kategori</th>
                   <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">Mevcut Stok (Kg)</th>
                   <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">Kritik Sınır (Kg)</th>
                   <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider text-center">Durum</th>
@@ -211,6 +218,11 @@ export default function HammaddePage() {
                             {material.name}
                           </span>
                         </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#222] text-slate-300 border border-[#333]">
+                          {material.category || "Granül"}
+                        </span>
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
@@ -308,6 +320,29 @@ export default function HammaddePage() {
                     className="w-full bg-[#0A0A0A] border border-[#333] rounded-xl pl-10 pr-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 focus:shadow-[0_0_15px_rgba(6,182,212,0.2)] transition-all placeholder:text-slate-600"
                     placeholder="Örn: Beyaz Granül / Polietilen"
                   />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="category" className="text-sm font-medium text-slate-300">
+                  Kategori <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    id="category"
+                    name="category"
+                    required
+                    value={formData.category}
+                    onChange={(e: any) => handleInputChange(e)}
+                    className="w-full bg-[#0A0A0A] border border-[#333] rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 appearance-none transition-all cursor-pointer"
+                  >
+                    <option value="Granül">Granül</option>
+                    <option value="Boya">Boya</option>
+                    <option value="Diğer">Diğer</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </div>
                 </div>
               </div>
 

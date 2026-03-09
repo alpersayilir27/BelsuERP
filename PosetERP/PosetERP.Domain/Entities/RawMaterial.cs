@@ -6,4 +6,5 @@ public class RawMaterial
     public string Name { get; set; } = string.Empty;
     public decimal StockKg { get; set; }
     public decimal MinimumStockAlert { get; set; }
+    public string Category { get; set; } = "Granül";
 }

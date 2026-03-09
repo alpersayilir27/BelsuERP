@@ -1,4 +1,6 @@
-import type { Metadata } from "next";
+"use client";
+
+import { useEffect, useState } from "react";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import {
@@ -8,22 +10,47 @@ import {
   Factory,
   PackageOpen,
   Bell,
-  UserCircle
+  UserCircle,
+  LogOut
 } from "lucide-react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 
 const inter = Inter({ subsets: ["latin"] });
-
-export const metadata: Metadata = {
-  title: "Poşet Üretim Takip - Dashboard",
-  description: "Modern Dashboard Interface",
-};
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    // Exclude login page from check for now 
+    if (pathname !== "/login") {
+      const role = localStorage.getItem("userRole");
+      setUserRole(role);
+    }
+  }, [pathname]);
+
+  const handleLogout = () => {
+    localStorage.clear();
+    router.push("/login");
+  };
+
+  // If on login page, just render children without sidebar
+  if (pathname === "/login") {
+    return (
+      <html lang="tr" className="dark">
+        <body className={`${inter.className} bg-[#0A0A0A] text-slate-200 antialiased selection:bg-cyan-500/30`}>
+          {children}
+        </body>
+      </html>
+    );
+  }
+
   return (
     <html lang="tr" className="dark">
       <body className={`${inter.className} bg-[#0A0A0A] text-slate-200 antialiased selection:bg-cyan-500/30`}>
@@ -37,18 +64,27 @@ export default function RootLayout({
                 </h1>
               </div>
               <nav className="p-4 space-y-2">
-                <Link href="/" className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)] transition-all">
-                  <LayoutDashboard size={20} />
-                  <span className="font-medium">Dashboard</span>
-                </Link>
-                <Link href="/musteriler" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-[#1A1A1A] hover:text-white transition-colors">
-                  <Users size={20} />
-                  <span className="font-medium">Müşteriler</span>
-                </Link>
-                <Link href="/siparisler" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-[#1A1A1A] hover:text-white transition-colors">
-                  <ShoppingCart size={20} />
-                  <span className="font-medium">Siparişler</span>
-                </Link>
+                {userRole !== "Usta" && (
+                  <>
+                    <Link href="/" className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)] transition-all">
+                      <LayoutDashboard size={20} />
+                      <span className="font-medium">Dashboard</span>
+                    </Link>
+                    <Link href="/musteriler" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-[#1A1A1A] hover:text-white transition-colors">
+                      <Users size={20} />
+                      <span className="font-medium">Müşteriler</span>
+                    </Link>
+                    <Link href="/siparisler" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-[#1A1A1A] hover:text-white transition-colors">
+                      <ShoppingCart size={20} />
+                      <span className="font-medium">Siparişler</span>
+                    </Link>
+                    <Link href="/sevkiyat" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-[#1A1A1A] hover:text-white transition-colors">
+                      <PackageOpen size={20} />
+                      <span className="font-medium">Sevkiyat</span>
+                    </Link>
+                  </>
+                )}
+                
                 <Link href="/uretim" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-[#1A1A1A] hover:text-white transition-colors">
                   <Factory size={20} />
                   <span className="font-medium">Üretim</span>
@@ -60,8 +96,16 @@ export default function RootLayout({
               </nav>
             </div>
 
-            {/* Sidebar Footer */}
-            <div className="p-4 border-t border-[#222]">
+            {/* Sidebar Footer with Logout */}
+            <div className="p-4 border-t border-[#222] space-y-4">
+              <button 
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 bg-[#1A1A1A] hover:bg-rose-500/10 hover:text-rose-400 border border-transparent hover:border-rose-500/20 transition-all group shadow-none hover:shadow-[0_0_15px_rgba(244,63,94,0.3)]"
+              >
+                <LogOut size={20} className="group-hover:translate-x-1 transition-transform" />
+                <span className="font-medium">Çıkış Yap</span>
+              </button>
+              
               <div className="text-xs text-slate-500 text-center">
                 &copy; {new Date().getFullYear()} Belsu Agency
               </div>

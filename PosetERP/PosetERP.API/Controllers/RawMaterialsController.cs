@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PosetERP.Domain.Entities;
 using PosetERP.Infrastructure;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PosetERP.API.Controllers;
 
+[Authorize(Roles = "Admin,Usta")]
 [ApiController]
 [Route("api/rawmaterials")]
 public class RawMaterialsController : ControllerBase
@@ -78,6 +80,7 @@ public class RawMaterialsController : ControllerBase
             material.Name = updateDto.Name;
             material.StockKg = updateDto.StockKg;
             material.MinimumStockAlert = updateDto.MinimumStockAlert;
+            material.Category = updateDto.Category ?? "Granül";
 
             await _context.SaveChangesAsync();
             return Ok(material);

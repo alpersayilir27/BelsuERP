@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { authFetch } from "../../lib/authFetch";
 import { Plus, Building2, UserCircle2, Phone, Wallet, AlertCircle, X, Loader2, Pencil, Trash2 } from "lucide-react";
 
 interface Customer {
@@ -24,11 +26,13 @@ export default function MusterilerPage() {
     contactPerson: "",
     phoneNumber: "",
   });
+  
+  const router = useRouter();
 
   const fetchCustomers = async () => {
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:5257/api/Customers");
+      const response = await authFetch("http://localhost:5257/api/Customers");
       if (!response.ok) {
         throw new Error("Müşteri verileri alınırken bir hata oluştu.");
       }
@@ -43,8 +47,15 @@ export default function MusterilerPage() {
   };
 
   useEffect(() => {
+    // Role Guard
+    const userRole = localStorage.getItem("userRole");
+    if (userRole === "Usta") {
+      router.push("/uretim");
+      return;
+    }
+    
     fetchCustomers();
-  }, []);
+  }, [router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -82,7 +93,7 @@ export default function MusterilerPage() {
         console.log("POST İsteği İçin Giden Payload:", payload);
       }
 
-      const response = await fetch(url, {
+      const response = await authFetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
@@ -120,7 +131,7 @@ export default function MusterilerPage() {
     if (!window.confirm(`'${companyName}' firmasını silmek istediğinize emin misiniz?`)) return;
 
     try {
-      const response = await fetch(`http://localhost:5257/api/Customers/${id}`, {
+      const response = await authFetch(`http://localhost:5257/api/Customers/${id}`, {
         method: "DELETE"
       });
 

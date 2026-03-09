@@ -12,7 +12,9 @@ public class Order
     public string? Dimensions { get; set; }
     public int ThicknessMicron { get; set; }
     public decimal RequestedAmountKg { get; set; }
+    public decimal TotalPrice { get; set; }
     public OrderStatus Status { get; set; }
+
 
     public Customer? Customer { get; set; }
     public ICollection<ProductionStage> ProductionStages { get; set; } = new List<ProductionStage>();

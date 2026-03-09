@@ -68,9 +68,20 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Servis Kayıtları (Dependency Injection)
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IProductionService, ProductionService>();
-
 builder.Services.AddControllers();
 
+builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes("BelsuERP_SuperSecretKey_2026_Minimum32Chars"))
+        };
+    });
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
@@ -92,6 +103,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
+
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapControllers();
 
 app.Run();

@@ -7,9 +7,11 @@ using PosetERP.Application.Interfaces;
 using PosetERP.Domain.Entities;
 using PosetERP.Domain.Enums;
 using PosetERP.Infrastructure;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PosetERP.API.Controllers;
 
+[Authorize(Roles = "Admin")]
 [ApiController]
 [Route("api/[controller]")]
 public class OrdersController : ControllerBase
@@ -40,6 +42,7 @@ public class OrdersController : ControllerBase
                 o.Dimensions,
                 o.ThicknessMicron,
                 o.RequestedAmountKg,
+                o.TotalPrice,
                 Status = o.Status.ToString()
             })
             .ToListAsync();
@@ -62,6 +65,7 @@ public class OrdersController : ControllerBase
             Dimensions = dto.Dimensions,
             ThicknessMicron = dto.ThicknessMicron,
             RequestedAmountKg = dto.RequestedAmountKg,
+            TotalPrice = dto.TotalPrice,
             Status = OrderStatus.Pending
         };
 
@@ -84,6 +88,23 @@ public class OrdersController : ControllerBase
             return BadRequest(new { Error = ex.Message });
         }
     }
+
+    [HttpPost("{id}/deliver")]
+    public async Task<IActionResult> DeliverOrder(Guid id)
+    {
+        var order = await _context.Orders.FindAsync(id);
+        if (order == null) return NotFound(new { Error = "Sipariş bulunamadı." });
+
+        if (order.Status != OrderStatus.Completed)
+        {
+            return BadRequest(new { Error = "Siparişin teslim edilebilmesi için üretimi tamamlanmış (Completed) olması gerekir." });
+        }
+
+        order.Status = OrderStatus.Shipped;
+        await _context.SaveChangesAsync();
+
+        return Ok(new { Message = "Sipariş teslim edildi ve arşivlendi." });
+    }
 }
 
 public class CreateOrderDto
@@ -94,4 +115,5 @@ public class CreateOrderDto
     public string? Dimensions { get; set; }
     public int ThicknessMicron { get; set; }
     public decimal RequestedAmountKg { get; set; }
+    public decimal TotalPrice { get; set; }
 }

@@ -1,12 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { fetchApi } from "../lib/api";
 import StockChart from "../components/StockChart";
+import OrderStatusChart from "../components/OrderStatusChart";
+import CriticalStockList from "../components/CriticalStockList";
 import {
   TrendingUp,
   AlertTriangle,
-  Users,
+  Wallet,
   Activity,
   ArrowRight,
   Loader2
@@ -16,14 +19,24 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState({
     pendingOrdersCount: 0,
-    totalCustomersCount: 0,
+    totalRevenue: 0,
     criticalStockCount: 0,
     activeProductionCount: 0,
     recentOrders: [] as any[],
-    rawMaterials: [] as any[]
+    rawMaterials: [] as any[],
+    allOrders: [] as any[]
   });
+  
+  const router = useRouter();
 
   useEffect(() => {
+    // Role Guard
+    const userRole = localStorage.getItem("userRole");
+    if (userRole === "Usta") {
+      router.push("/uretim");
+      return;
+    }
+
     async function loadData() {
       try {
         const [ordersRes, customersRes, rawMaterialsRes, productionRes] = await Promise.all([
@@ -41,9 +54,9 @@ export default function DashboardPage() {
         const productions = extractArray(productionRes);
 
         const pendingOrders = orders.filter((o: any) => o.status === 0 || o.status === 'Pending').length;
-        const totalCustomers = customers.length;
+        const totalRevenue = orders.reduce((sum: number, o: any) => sum + (o.totalPrice || 0), 0);
         const criticalStocks = rawMaterials.filter((m: any) => m.stockKg < m.minimumStockAlert).length;
-        const activeProductions = productions.filter((p: any) => p.status === 1 || p.status === 'InProgress').length;
+        const activeProductions = orders.filter((o: any) => o.status === 1 || o.status === 'InProduction').length;
 
         const sortedOrders = [...orders]
           .sort((a: any, b: any) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime())
@@ -51,11 +64,12 @@ export default function DashboardPage() {
 
         setData({
           pendingOrdersCount: pendingOrders,
-          totalCustomersCount: totalCustomers,
+          totalRevenue: totalRevenue,
           criticalStockCount: criticalStocks,
           activeProductionCount: activeProductions,
           recentOrders: sortedOrders,
-          rawMaterials: rawMaterials
+          rawMaterials: rawMaterials,
+          allOrders: orders
         });
       } catch (error) {
         console.error("Dashboard veri yükleme hatası:", error);
@@ -89,13 +103,13 @@ export default function DashboardPage() {
       bg: "bg-[#111111]"
     },
     {
-      title: "Toplam Müşteri",
-      value: data.totalCustomersCount.toString(),
-      icon: Users,
-      trend: "Sistemdeki cari",
-      trendColor: "text-cyan-400",
-      glow: "shadow-[0_0_30px_rgba(6,182,212,0.15)]",
-      iconColor: "text-cyan-400",
+      title: "Toplam Ciro",
+      value: `₺${data.totalRevenue.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`,
+      icon: Wallet,
+      trend: "Sistemde kayıtlı ciro",
+      trendColor: "text-emerald-400",
+      glow: "shadow-[0_0_30px_rgba(16,185,129,0.15)]",
+      iconColor: "text-emerald-400",
       bg: "bg-[#111111]"
     },
     {
@@ -183,6 +197,16 @@ export default function DashboardPage() {
 
           {/* Stock Chart */}
           <StockChart data={data.rawMaterials} />
+
+          {/* Status & Critical Analysis Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="h-[400px]">
+              <OrderStatusChart orders={data.allOrders} />
+            </div>
+            <div className="h-[400px]">
+              <CriticalStockList rawMaterials={data.rawMaterials} />
+            </div>
+          </div>
 
           {/* Recent Orders Table */}
           <div className="bg-[#111111] rounded-2xl border border-[#222] overflow-hidden shadow-2xl relative">

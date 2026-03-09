@@ -16,14 +16,31 @@ export default function LoginPage() {
     setError("");
     setIsLoading(true);
 
-    // Simulate short network delay for better UX
-    await new Promise(resolve => setTimeout(resolve, 800));
+    try {
+      const response = await fetch("http://localhost:5257/api/Auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
 
-    if (username === "admin" && password === "123456") {
-      localStorage.setItem("isLoggedIn", "true");
-      router.push("/");
-    } else {
-      setError("Hatalı kullanıcı adı veya şifre");
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("userRole", data.role);
+        localStorage.setItem("isLoggedIn", "true"); // keeping this for compatibility
+        if (data.role === "Usta") {
+          router.push("/uretim");
+        } else {
+          router.push("/");
+        }
+      } else {
+        setError("Hatalı kullanıcı adı veya şifre");
+      }
+    } catch (err) {
+      setError("Sunucuya bağlanılamadı.");
+    } finally {
       setIsLoading(false);
     }
   };

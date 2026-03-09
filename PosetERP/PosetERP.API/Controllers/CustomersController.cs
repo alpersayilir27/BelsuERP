@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PosetERP.Domain.Entities;
 using PosetERP.Infrastructure;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PosetERP.API.Controllers;
 
+[Authorize(Roles = "Admin")]
 [ApiController]
 [Route("api/[controller]")]
 public class CustomersController : ControllerBase
