@@ -11,6 +11,7 @@ import {
   AlertCircle,
   X
 } from "lucide-react";
+import { useToast } from "../../components/ToastProvider";
 
 interface Order {
   id: string;
@@ -22,6 +23,7 @@ interface Order {
   dimensions?: string;
   thicknessMicron: number;
   requestedAmountKg: number;
+  totalPrice?: number;
   status: string;
 }
 
@@ -35,6 +37,7 @@ export default function SevkiyatPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
   const fetchCompletedOrders = async () => {
     try {
@@ -76,21 +79,21 @@ export default function SevkiyatPage() {
 
       await fetchCompletedOrders();
       setIsModalOpen(false);
+      toast({
+        type: "success",
+        title: "Teslimat Onaylandı",
+        message: `'${selectedOrder.customerName}' siparişi başarıyla sevk edildi ve arşivlendi.`
+      });
     } catch (err: any) {
-      alert(err.message || "Bilinmeyen bir hata oluştu.");
+      toast({
+        type: "error",
+        title: "Teslimat Hatası",
+        message: err.message || "Bilinmeyen bir hata oluştu."
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="flex-1 flex flex-col items-center justify-center h-full min-h-[400px]">
-        <Loader2 className="w-8 h-8 text-cyan-500 animate-spin mb-4" />
-        <p className="text-slate-400">Sevkiyat bekleyen siparişler yükleniyor...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto h-full flex flex-col blur-0 transition-all duration-300">
@@ -134,7 +137,22 @@ export default function SevkiyatPage() {
       )}
 
       {/* CONTENT GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {loading && orders.length === 0 && !error ? (
+        <div className="flex-1 flex flex-col items-center justify-center h-full min-h-[400px]">
+          <div className="relative w-16 h-16">
+            <div className="absolute inset-0 border-4 border-[#222] rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-cyan-500 rounded-full border-t-transparent animate-spin glow-cyan"></div>
+          </div>
+          <p className="mt-4 text-slate-400 text-sm font-medium animate-pulse">Sevkiyat verileri yükleniyor...</p>
+        </div>
+      ) : (
+        <div className={`relative transition-all duration-300 ${loading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+          {loading && orders.length > 0 && (
+            <div className="absolute top-[-48px] right-2 z-20 bg-[#111] p-2 rounded-full shadow-lg border border-[#333]">
+              <Loader2 size={16} className="text-cyan-500 animate-spin" />
+            </div>
+          )}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {orders.filter(o => activeTab === "bekleyen" ? o.status === "Completed" : o.status === "Shipped").length === 0 && !error ? (
           <div className="col-span-full flex flex-col items-center justify-center p-12 bg-[#111111] border border-[#222] rounded-2xl border-dashed">
             <div className="w-16 h-16 bg-[#1A1A1A] rounded-full flex items-center justify-center mb-4">
@@ -221,7 +239,9 @@ export default function SevkiyatPage() {
             </div>
           ))
         )}
-      </div>
+        </div>
+        </div>
+      )}
 
       {/* İRSALİYE / TESLİMAT MODALI */}
       {isModalOpen && selectedOrder && (
@@ -249,59 +269,92 @@ export default function SevkiyatPage() {
               </button>
             </div>
 
-            {/* Modal Body: İrsaliye Tasarımı */}
-            <div className="p-8 space-y-6">
+            {/* Modal Body: Resmi İrsaliye Tasarımı */}
+            <div className="p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
               
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-white tracking-widest uppercase opacity-90">BELSU <span className="text-cyan-400 opacity-80">ERP</span></h2>
-                <div className="h-px w-24 bg-gradient-to-r from-transparent via-[#444] to-transparent mx-auto mt-4 mb-2"></div>
-                <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold flex items-center justify-center gap-4">
-                  <span>Tarih: {new Date().toLocaleDateString('tr-TR')}</span>
-                  <span>|</span>
-                  <span>Saat: {new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</span>
-                </p>
+              {/* Header section of Invoice */}
+              <div className="flex justify-between items-start border-b border-[#333] pb-6">
+                <div>
+                  <h2 className="text-3xl font-black text-white tracking-tighter uppercase flex items-center gap-2">
+                    BELSU <span className="text-cyan-400 font-light">ERP</span>
+                  </h2>
+                  <p className="text-sm text-slate-500 mt-1">Sipariş Teslimat İrsaliyesi</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-slate-500 uppercase tracking-widest font-semibold mb-1">Teslimat Tarihi</p>
+                  <p className="text-white font-medium">{new Date().toLocaleDateString('tr-TR')}</p>
+                  <p className="text-xs text-slate-400 mt-1">{new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</p>
+                </div>
               </div>
 
-              <div className="bg-[#0A0A0A] border border-[#222] rounded-xl p-6 relative overflow-hidden group">
-                {/* Çok şık bir hologramik detay */}
-                <div className="absolute -top-10 -right-10 w-32 h-32 bg-cyan-500/5 rounded-full blur-2xl group-hover:bg-cyan-500/10 transition-colors"></div>
+              {/* Customer Info */}
+              <div className="bg-[#0A0A0A] border border-[#222] rounded-xl p-5 relative overflow-hidden group">
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-cyan-500/5 rounded-full blur-2xl group-hover:bg-cyan-500/10 transition-colors pointer-events-none"></div>
                 
-                <div className="space-y-4 relative z-10">
-                  <div className="flex justify-between items-baseline border-b border-[#222] pb-3">
-                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Müşteri Firması</span>
-                    <span className="text-lg font-bold text-cyan-400 text-right">{selectedOrder.customerName}</span>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Müşteri / Alıcı</p>
+                <h3 className="text-xl font-bold text-cyan-400">{selectedOrder.customerName}</h3>
+                
+                <div className="grid grid-cols-2 gap-4 mt-5 pt-5 border-t border-[#222]">
+                  <div>
+                    <span className="block text-xs text-slate-500 mb-1">Sipariş No</span>
+                    <span className="text-sm font-medium text-slate-300">#{selectedOrder.id.substring(0, 8).toUpperCase()}</span>
                   </div>
-                  
-                  <div className="flex justify-between items-baseline border-b border-[#222] pb-3">
-                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Poşet Tipi</span>
-                    <span className="text-white font-medium">{selectedOrder.bagType}</span>
-                  </div>
-
-                  <div className="flex justify-between items-baseline border-b border-[#222] pb-3">
-                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Ebat & Kalınlık</span>
-                    <span className="text-slate-300 font-medium">
-                      {selectedOrder.dimensions ? `${selectedOrder.dimensions} / ` : ''}{selectedOrder.thicknessMicron} Mikron
-                    </span>
-                  </div>
-                  
-                  <div className="flex justify-between items-baseline pt-2">
-                    <span className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Toplam Miktar</span>
-                    <span className="text-2xl font-black text-emerald-400 text-right drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]">
-                      {selectedOrder.requestedAmountKg.toLocaleString('tr-TR')} <span className="text-sm font-medium text-emerald-500/70">Kg</span>
+                  <div>
+                    <span className="block text-xs text-slate-500 mb-1">Hedef Tarih</span>
+                    <span className="text-sm font-medium text-slate-300">
+                      {selectedOrder.targetDeliveryDate ? new Date(selectedOrder.targetDeliveryDate).toLocaleDateString('tr-TR') : '-'}
                     </span>
                   </div>
                 </div>
               </div>
 
+              {/* Product Details Table */}
+              <div className="border border-[#222] rounded-xl overflow-hidden">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-[#151515] text-slate-400 text-xs uppercase tracking-wider border-b border-[#222]">
+                    <tr>
+                      <th className="px-5 py-3 font-medium">Poşet Tipi / Ebat</th>
+                      <th className="px-5 py-3 font-medium">Kalınlık</th>
+                      <th className="px-5 py-3 text-right font-medium">Miktar (Kg)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-[#0A0A0A] divide-y divide-[#222]">
+                    <tr>
+                      <td className="px-5 py-4">
+                        <p className="text-white font-medium">{selectedOrder.bagType}</p>
+                        <p className="text-xs text-slate-400 mt-0.5">{selectedOrder.dimensions || 'Ölçü belirtilmedi'}</p>
+                      </td>
+                      <td className="px-5 py-4 text-slate-300">{selectedOrder.thicknessMicron} Mikron</td>
+                      <td className="px-5 py-4 text-right">
+                        <span className="text-emerald-400 font-bold">{selectedOrder.requestedAmountKg.toLocaleString('tr-TR')}</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Total Price Section */}
+              <div className="flex justify-between items-center bg-[#111111] border border-emerald-500/30 rounded-xl p-5 shadow-[0_0_20px_rgba(16,185,129,0.05)]">
+                <div>
+                  <span className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Genel Toplam Tutar</span>
+                  <p className="text-xs text-emerald-500/70 mt-1">KDV Hariç Sistem Tutarı</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-3xl font-black text-emerald-400 drop-shadow-[0_0_12px_rgba(16,185,129,0.4)] tracking-tight">
+                    {selectedOrder.totalPrice ? selectedOrder.totalPrice.toLocaleString('tr-TR') : "0"} <span className="text-lg">₺</span>
+                  </span>
+                </div>
+              </div>
+
               <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-4 flex gap-3 text-emerald-300/80 text-sm">
                 <AlertCircle size={18} className="shrink-0 mt-0.5" />
-                <p>Bu siparişi teslim ettiğinizde, statüsü arşivlenecek ve aktif listeden kaldırılacaktır. Bu işlem geri alınamaz.</p>
+                <p>Bu siparişi teslim ettiğinizde, statüsü arşivlenecek ve aktif üretim listesinden tamamen kaldırılacaktır. Bu işlem geri alınamaz.</p>
               </div>
 
             </div>
 
             {/* Modal Footer */}
-            <div className="p-6 border-t border-[#222] bg-[#151515] flex justify-end gap-3 rounded-b-2xl">
+            <div className="p-5 border-t border-[#222] bg-[#151515] flex justify-end gap-3 rounded-b-2xl">
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}

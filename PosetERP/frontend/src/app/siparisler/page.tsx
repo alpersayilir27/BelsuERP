@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authFetch } from "../../lib/authFetch";
-import { Plus, ShoppingCart, Calendar, AlertCircle, X, Loader2, Play } from "lucide-react";
+import { Plus, ShoppingCart, Calendar, AlertCircle, X, Loader2, Play, FilePlus, ArrowRight, ClipboardList } from "lucide-react";
+import { useToast } from "../../components/ToastProvider";
 
 interface Order {
   id: string;
@@ -36,6 +37,8 @@ export default function SiparislerPage() {
   const [isStartingProduction, setIsStartingProduction] = useState<string | null>(null);
   
   const [confirmModalState, setConfirmModalState] = useState<{ isOpen: boolean, orderId: string | null }>({ isOpen: false, orderId: null });
+
+  const { toast } = useToast();
 
   const [formData, setFormData] = useState({
     customerId: "",
@@ -98,6 +101,22 @@ export default function SiparislerPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const preventInvalidNumberInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "-" || e.key === "e" || e.key === "E" || e.key === "+") {
+      e.preventDefault();
+    }
+  };
+
+  const handleCurrencyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, ""); // Keep only digits
+    if (!value) {
+      setFormData((prev) => ({ ...prev, totalPrice: "" }));
+      return;
+    }
+    const formatted = new Intl.NumberFormat("tr-TR").format(parseInt(value, 10));
+    setFormData((prev) => ({ ...prev, totalPrice: formatted }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.customerId || !formData.targetDeliveryDate || !formData.requestedAmountKg) return;
@@ -114,7 +133,7 @@ export default function SiparislerPage() {
           dimensions: formData.dimensions,
           thicknessMicron: Number(formData.thicknessMicron) || 0,
           requestedAmountKg: Number(formData.requestedAmountKg) || 0,
-          totalPrice: Number(formData.totalPrice) || 0,
+          totalPrice: Number(formData.totalPrice.replace(/\./g, "")) || 0,
         }),
       });
 
@@ -133,8 +152,17 @@ export default function SiparislerPage() {
         targetDeliveryDate: "",
       });
       await fetchData();
+      toast({
+        type: "success",
+        title: "Sipariş Oluşturuldu",
+        message: `${formData.requestedAmountKg} Kg sipariş başarıyla eklendi.`
+      });
     } catch (err: any) {
-      alert(err.message || "Ekleme başarısız oldu.");
+      toast({
+        type: "error",
+        title: "Hata Oluştu",
+        message: err.message || "Ekleme başarısız oldu."
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -156,8 +184,17 @@ export default function SiparislerPage() {
       }
 
       await fetchData();
+      toast({
+        type: "success",
+        title: "Üretim Başladı",
+        message: "Sipariş başarıyla üretim bandına alındı."
+      });
     } catch (err: any) {
-      alert(err.message || "İşlem başarısız oldu.");
+      toast({
+        type: "error",
+        title: "Hata Oluştu",
+        message: err.message || "İşlem başarısız oldu."
+      });
     } finally {
       setIsStartingProduction(null);
     }
@@ -184,6 +221,20 @@ export default function SiparislerPage() {
           <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.1)]">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-2 shadow-[0_0_5px_rgba(16,185,129,0.8)]"></span>
             Tamamlandı
+          </span>
+        );
+      case "Shipped":
+        return (
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border bg-blue-500/10 text-blue-400 border-blue-500/20 shadow-[0_0_10px_rgba(96,165,250,0.1)]">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 mr-2 shadow-[0_0_5px_rgba(96,165,250,0.8)]"></span>
+            Sevk Edildi
+          </span>
+        );
+      case "Delivered":
+        return (
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border bg-violet-500/10 text-violet-400 border-violet-500/20 shadow-[0_0_10px_rgba(167,139,250,0.1)]">
+            <span className="w-1.5 h-1.5 rounded-full bg-violet-400 mr-2 shadow-[0_0_5px_rgba(167,139,250,0.8)]"></span>
+            Teslim Edildi
           </span>
         );
       default:
@@ -214,7 +265,7 @@ export default function SiparislerPage() {
       </div>
 
       <div className="bg-[#111111] rounded-2xl border border-[#222] shadow-2xl relative overflow-hidden min-h-[400px]">
-        {loading ? (
+        {loading && orders.length === 0 && !error ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#111] z-10">
             <div className="relative w-16 h-16">
               <div className="absolute inset-0 border-4 border-[#222] rounded-full"></div>
@@ -239,7 +290,12 @@ export default function SiparislerPage() {
             <p className="text-slate-400 text-sm">Sisteme kayıtlı veya bekleyen herhangi bir sipariş bulunamadı.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto w-full pb-4">
+          <div className={`overflow-x-auto w-full pb-4 transition-all duration-300 ${loading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+            {loading && orders.length > 0 && (
+              <div className="absolute top-4 right-4 z-20 bg-[#111] p-2 rounded-full shadow-lg border border-[#333]">
+                <Loader2 size={16} className="text-cyan-500 animate-spin" />
+              </div>
+            )}
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-[#0A0A0A] border-b border-[#222]">
@@ -418,7 +474,8 @@ export default function SiparislerPage() {
                     min="0"
                     value={formData.thicknessMicron}
                     onChange={handleInputChange}
-                    className="w-full bg-[#0A0A0A] border border-[#333] rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-slate-600"
+                    onKeyDown={preventInvalidNumberInput}
+                    className={`w-full bg-[#0A0A0A] border rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none transition-all placeholder:text-slate-600 ${Number(formData.thicknessMicron) < 0 ? 'border-rose-500/50 focus:border-rose-500 focus:ring-1 focus:ring-rose-500/50' : 'border-[#333] focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50'}`}
                     placeholder="0"
                   />
                 </div>
@@ -435,9 +492,15 @@ export default function SiparislerPage() {
                     min="1"
                     value={formData.requestedAmountKg}
                     onChange={handleInputChange}
-                    className="w-full bg-[#0A0A0A] border border-[#333] rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 focus:shadow-[0_0_15px_rgba(6,182,212,0.2)] transition-all placeholder:text-slate-600"
+                    onKeyDown={preventInvalidNumberInput}
+                    className={`w-full bg-[#0A0A0A] border rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none transition-all placeholder:text-slate-600 ${Number(formData.requestedAmountKg) < 0 ? 'border-rose-500/50 focus:border-rose-500 focus:ring-1 focus:ring-rose-500/50' : 'border-[#333] focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50'}`}
                     placeholder="0"
                   />
+                  {Number(formData.requestedAmountKg) < 0 && (
+                    <p className="mt-1 text-xs font-bold text-rose-500 animate-pulse text-shadow-sm">
+                      Negatif değer girilemez
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -448,15 +511,13 @@ export default function SiparislerPage() {
                   </label>
                   <div className="relative">
                     <input
-                      type="number"
+                      type="text"
                       id="totalPrice"
                       name="totalPrice"
-                      min="0"
-                      step="0.01"
                       value={formData.totalPrice}
-                      onChange={handleInputChange}
+                      onChange={handleCurrencyChange}
                       className="w-full bg-[#0A0A0A] border border-[#333] rounded-xl pl-4 pr-10 py-2.5 text-emerald-400 font-bold text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 focus:shadow-[0_0_15px_rgba(16,185,129,0.2)] transition-all placeholder:text-emerald-900/50"
-                      placeholder="0.00"
+                      placeholder="0"
                     />
                     <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-emerald-500 font-semibold">
                       ₺
@@ -477,7 +538,7 @@ export default function SiparislerPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmitting || !formData.customerId || !formData.targetDeliveryDate || !formData.requestedAmountKg}
+                  disabled={isSubmitting || !formData.customerId || !formData.targetDeliveryDate || !formData.requestedAmountKg || Number(formData.requestedAmountKg) < 0 || Number(formData.thicknessMicron) < 0}
                   className="px-5 py-2 flex items-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-[#050505] font-semibold rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? (

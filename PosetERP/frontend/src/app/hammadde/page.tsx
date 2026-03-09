@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { authFetch } from "../../lib/authFetch";
-import { Plus, Package, AlertCircle, X, Loader2, Scale, Pencil, Trash2 } from "lucide-react";
+import { Plus, Package, AlertCircle, X, Loader2, Scale, Pencil, Trash2, AlertTriangle } from "lucide-react";
+import { useToast } from "../../components/ToastProvider";
 
 interface RawMaterial {
   id: string;
@@ -16,6 +17,7 @@ export default function HammaddePage() {
   const [materials, setMaterials] = useState<RawMaterial[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -51,6 +53,12 @@ export default function HammaddePage() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const preventInvalidNumberInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "-" || e.key === "e" || e.key === "E" || e.key === "+") {
+      e.preventDefault();
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -100,9 +108,18 @@ export default function HammaddePage() {
 
       closeModal();
       await fetchMaterials();
+      toast({
+        type: "success",
+        title: editingId ? "Başarıyla Güncellendi" : "Başarıyla Eklendi",
+        message: `'${formData.name}' stoklarımıza işlendi.`
+      });
     } catch (err: any) {
       console.error("Catch Hatası:", err);
-      alert(err.message || "İşlem başarısız oldu.");
+      toast({
+        type: "error",
+        title: "Kayıt Hatası",
+        message: err.message || "İşlem başarısız oldu."
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -132,8 +149,17 @@ export default function HammaddePage() {
       }
 
       await fetchMaterials();
+      toast({
+        type: "success",
+        title: "Silme İşlemi Başarılı",
+        message: `'${name}' listeden tamamen kaldırıldı.`
+      });
     } catch (err: any) {
-      alert(err.message || "Silme işlemi başarısız oldu.");
+      toast({
+        type: "error",
+        title: "Hata",
+        message: err.message || "Silme işlemi başarısız oldu."
+      });
     }
   };
 
@@ -163,7 +189,7 @@ export default function HammaddePage() {
       </div>
 
       <div className="bg-[#111111] rounded-2xl border border-[#222] shadow-2xl relative overflow-hidden min-h-[400px]">
-        {loading ? (
+        {loading && materials.length === 0 && !error ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#111] z-10">
             <div className="relative w-16 h-16">
               <div className="absolute inset-0 border-4 border-[#222] rounded-full"></div>
@@ -188,7 +214,12 @@ export default function HammaddePage() {
             <p className="text-slate-400 text-sm">Sisteme kayıtlı herhangi bir hammadde bulunamadı.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto w-full">
+          <div className={`overflow-x-auto w-full transition-all duration-300 ${loading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+            {loading && materials.length > 0 && (
+              <div className="absolute top-4 right-4 z-20 bg-[#111] p-2 rounded-full shadow-lg border border-[#333]">
+                <Loader2 size={16} className="text-cyan-500 animate-spin" />
+              </div>
+            )}
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-[#0A0A0A] border-b border-[#222]">
@@ -363,9 +394,15 @@ export default function HammaddePage() {
                     step="0.01"
                     value={formData.stockAmount}
                     onChange={handleInputChange}
-                    className="w-full bg-[#0A0A0A] border border-[#333] rounded-xl pl-10 pr-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 focus:shadow-[0_0_15px_rgba(6,182,212,0.2)] transition-all placeholder:text-slate-600"
+                    onKeyDown={preventInvalidNumberInput}
+                    className={`w-full bg-[#0A0A0A] border rounded-xl pl-10 pr-4 py-2.5 text-white text-sm focus:outline-none focus:ring-1 transition-all placeholder:text-slate-600 ${
+                      Number(formData.stockAmount) < 0 ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/50 focus:shadow-[0_0_15px_rgba(244,63,94,0.2)]' : 'border-[#333] focus:border-cyan-500 focus:ring-cyan-500/50 focus:shadow-[0_0_15px_rgba(6,182,212,0.2)]'
+                    }`}
                     placeholder="0"
                   />
+                  {Number(formData.stockAmount) < 0 && (
+                    <p className="text-xs text-rose-500 mt-1 absolute -bottom-5 left-0">Negatif değer girilemez</p>
+                  )}
                 </div>
               </div>
 
@@ -386,9 +423,15 @@ export default function HammaddePage() {
                     step="0.01"
                     value={formData.criticalStockLevel}
                     onChange={handleInputChange}
-                    className="w-full bg-[#0A0A0A] border border-[#333] rounded-xl pl-10 pr-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 focus:shadow-[0_0_15px_rgba(6,182,212,0.2)] transition-all placeholder:text-slate-600"
+                    onKeyDown={preventInvalidNumberInput}
+                    className={`w-full bg-[#0A0A0A] border rounded-xl pl-10 pr-4 py-2.5 text-white text-sm focus:outline-none focus:ring-1 transition-all placeholder:text-slate-600 ${
+                      Number(formData.criticalStockLevel) < 0 ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/50 focus:shadow-[0_0_15px_rgba(244,63,94,0.2)]' : 'border-[#333] focus:border-cyan-500 focus:ring-cyan-500/50 focus:shadow-[0_0_15px_rgba(6,182,212,0.2)]'
+                    }`}
                     placeholder="0"
                   />
+                  {Number(formData.criticalStockLevel) < 0 && (
+                    <p className="text-xs text-rose-500 mt-1 absolute -bottom-5 left-0">Negatif değer girilemez</p>
+                  )}
                 </div>
               </div>
 
@@ -404,7 +447,7 @@ export default function HammaddePage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmitting || !formData.name.trim() || formData.stockAmount === "" || formData.criticalStockLevel === ""}
+                  disabled={isSubmitting || !formData.name.trim() || formData.stockAmount === "" || formData.criticalStockLevel === "" || Number(formData.stockAmount) < 0 || Number(formData.criticalStockLevel) < 0}
                   className="px-5 py-2 flex items-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-[#050505] font-semibold rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? (

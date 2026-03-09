@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authFetch } from "../../lib/authFetch";
-import { Plus, Building2, UserCircle2, Phone, Wallet, AlertCircle, X, Loader2, Pencil, Trash2 } from "lucide-react";
+import { Plus, Building2, UserCircle, Phone, Wallet, AlertCircle, X, Loader2, UserCircle2, Pencil, Trash2 } from "lucide-react";
+import { useToast } from "../../components/ToastProvider";
 
 interface Customer {
   id: string;
@@ -17,6 +18,7 @@ export default function MusterilerPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -109,9 +111,18 @@ export default function MusterilerPage() {
 
       closeModal();
       await fetchCustomers();
+      toast({
+        type: "success",
+        title: editingId ? "Müşteri Güncellendi" : "Müşteri Eklendi",
+        message: `'${formData.companyName}' başarıyla kaydedildi.`
+      });
     } catch (err: any) {
       console.error("Catch Hatası:", err);
-      alert(err.message || "İşlem başarısız oldu.");
+      toast({
+        type: "error",
+        title: "Kayıt Başarısız",
+        message: err.message || "İşlem başarısız oldu."
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -140,8 +151,17 @@ export default function MusterilerPage() {
       }
 
       await fetchCustomers();
+      toast({
+        type: "success",
+        title: "Kayıt Silindi",
+        message: `'${companyName}' sistemden tamamen kaldırıldı.`
+      });
     } catch (err: any) {
-      alert(err.message || "Silme işlemi başarısız oldu.");
+      toast({
+        type: "error",
+        title: "Hata Oluştu",
+        message: err.message || "Silme işlemi başarısız oldu."
+      });
     }
   };
 
@@ -171,7 +191,7 @@ export default function MusterilerPage() {
       </div>
 
       <div className="bg-[#111111] rounded-2xl border border-[#222] shadow-2xl relative overflow-hidden min-h-[400px]">
-        {loading ? (
+        {loading && customers.length === 0 && !error ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#111] z-10">
             <div className="relative w-16 h-16">
               <div className="absolute inset-0 border-4 border-[#222] rounded-full"></div>
@@ -196,7 +216,12 @@ export default function MusterilerPage() {
             <p className="text-slate-400 text-sm">Sisteme kayıtlı herhangi bir müşteri bulunamadı.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto w-full">
+          <div className={`overflow-x-auto w-full transition-all duration-300 ${loading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+            {loading && customers.length > 0 && (
+              <div className="absolute top-4 right-4 z-20 bg-[#111] p-2 rounded-full shadow-lg border border-[#333]">
+                <Loader2 size={16} className="text-cyan-500 animate-spin" />
+              </div>
+            )}
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-[#0A0A0A] border-b border-[#222]">

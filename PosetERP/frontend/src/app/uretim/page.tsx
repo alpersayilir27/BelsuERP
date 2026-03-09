@@ -14,6 +14,7 @@ import {
   PackageOpen,
   ArrowRight
 } from "lucide-react";
+import { useToast } from "../../components/ToastProvider";
 
 interface ProductionStage {
   id: string;
@@ -44,6 +45,7 @@ export default function UretimPage() {
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -111,6 +113,12 @@ export default function UretimPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const preventInvalidNumberInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "-" || e.key === "e" || e.key === "E" || e.key === "+") {
+      e.preventDefault();
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedStage) return;
@@ -149,8 +157,17 @@ export default function UretimPage() {
 
       await fetchData();
       setIsModalOpen(false);
+      toast({
+        type: "success",
+        title: "Üretim Tamamlandı",
+        message: `${selectedStage.stageType} aşaması tamamlandı ve hammadde düşüldü.`
+      });
     } catch (err: any) {
-      alert(err.message || "İşlem başarısız oldu.");
+      toast({
+        type: "error",
+        title: "Kayıt Hatası",
+        message: err.message || "İşlem başarısız oldu."
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -227,12 +244,17 @@ export default function UretimPage() {
         });
         if (response.ok) {
           await fetchData();
+          toast({
+            type: "success",
+            title: "Durum Güncellendi",
+            message: `Aşama ${newStatus === 'InProgress' ? 'Makinede' : 'Bekliyor'} olarak işaretlendi.`
+          });
         } else {
           const errData = await response.json();
-          alert(errData.Error || "Durum güncellenemedi.");
+          toast({ type: "error", title: "Hata", message: errData.Error || "Durum güncellenemedi." });
         }
       } catch (err: any) {
-        alert(err.message || "İşlem başarısız oldu.");
+        toast({ type: "error", title: "Beklenmeyen Hata", message: err.message || "İşlem başarısız oldu." });
       }
     }
   };
@@ -289,7 +311,7 @@ export default function UretimPage() {
         </div>
       </div>
 
-      {loading ? (
+      {loading && stages.length === 0 && !error ? (
         <div className="bg-[#111111] rounded-2xl border border-[#222] shadow-2xl relative min-h-[400px] flex flex-col items-center justify-center">
           <div className="relative w-16 h-16">
             <div className="absolute inset-0 border-4 border-[#222] rounded-full"></div>
@@ -313,10 +335,17 @@ export default function UretimPage() {
           <h3 className="text-white font-medium text-lg mb-2">Aktif Üretim Yok</h3>
           <p className="text-slate-400 text-sm">Üretime alınmış herhangi bir sipariş bulunmuyor.</p>
         </div>
-      ) : activeTab === "gecmis" ? (
-        <div className="bg-[#111111] border border-[#222] rounded-2xl shadow-xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+      ) : (
+        <div className={`relative transition-all duration-300 ${loading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+          {loading && stages.length > 0 && (
+            <div className="absolute top-[-48px] right-2 z-20 bg-[#111] p-2 rounded-full shadow-lg border border-[#333]">
+              <Loader2 size={16} className="text-cyan-500 animate-spin" />
+            </div>
+          )}
+          {activeTab === "gecmis" ? (
+            <div className="bg-[#111111] border border-[#222] rounded-2xl shadow-xl overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-[#0A0A0A] border-b border-[#222]">
                   <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Sipariş No</th>
@@ -520,6 +549,8 @@ export default function UretimPage() {
             );
           })}
         </div>
+        )}
+      </div>
       )}
 
       {/* MODAL */}
@@ -618,12 +649,18 @@ export default function UretimPage() {
                         step="0.1"
                         value={formData.consumedAmountKg}
                         onChange={handleInputChange}
-                        className={`w-full bg-[#0A0A0A] border rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none transition-all placeholder:text-slate-600 ${isStockInsufficient ? 'border-rose-500/50 focus:border-rose-500 focus:ring-1 focus:ring-rose-500/50' : 'border-[#333] focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50'}`}
+                        onKeyDown={preventInvalidNumberInput}
+                        className={`w-full bg-[#0A0A0A] border rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none transition-all placeholder:text-slate-600 ${isStockInsufficient || Number(formData.consumedAmountKg) < 0 ? 'border-rose-500/50 focus:border-rose-500 focus:ring-1 focus:ring-rose-500/50' : 'border-[#333] focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50'}`}
                         placeholder="0"
                       />
                       {isStockInsufficient && (
                         <p className="mt-1 text-xs font-bold text-rose-500 animate-pulse text-shadow-sm">
                           Yetersiz Stok!
+                        </p>
+                      )}
+                      {Number(formData.consumedAmountKg) < 0 && (
+                        <p className="mt-1 text-xs font-bold text-rose-500 animate-pulse text-shadow-sm">
+                          Negatif değer girilemez
                         </p>
                       )}
                     </div>
@@ -641,7 +678,8 @@ export default function UretimPage() {
                       step="0.1"
                       value={formData.wasteKg}
                       onChange={handleInputChange}
-                      className="w-full bg-[#0A0A0A] border border-[#333] rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-slate-600"
+                      onKeyDown={preventInvalidNumberInput}
+                      className={`w-full bg-[#0A0A0A] border rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none transition-all placeholder:text-slate-600 ${Number(formData.wasteKg) < 0 ? 'border-rose-500/50 focus:border-rose-500 focus:ring-1 focus:ring-rose-500/50' : 'border-[#333] focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50'}`}
                       placeholder="0"
                     />
                   </div>
@@ -659,7 +697,16 @@ export default function UretimPage() {
                   </button>
                   <button
                     type="submit"
-                    disabled={isSubmitting || (selectedStage.stageType !== "Cutting" && (!formData.materialId || formData.consumedAmountKg === "" || isStockInsufficient))}
+                    disabled={
+                      isSubmitting || 
+                      (selectedStage.stageType !== "Cutting" && (
+                        !formData.materialId || 
+                        formData.consumedAmountKg === "" || 
+                        isStockInsufficient ||
+                        Number(formData.consumedAmountKg) < 0
+                      )) ||
+                      Number(formData.wasteKg) < 0
+                    }
                     className="px-5 py-2 flex items-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-[#050505] font-semibold rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isSubmitting ? (
