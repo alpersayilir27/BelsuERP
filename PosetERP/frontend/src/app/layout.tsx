@@ -11,7 +11,8 @@ import {
   PackageOpen,
   Bell,
   UserCircle,
-  LogOut
+  LogOut,
+  UsersRound
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -70,30 +71,36 @@ export default function RootLayout({
                 <nav className="p-4 space-y-2">
                   {userRole !== "Usta" && (
                     <>
-                      <Link href="/" className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)] transition-all">
+                      <Link href="/" className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${pathname === "/" ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)]" : "text-slate-400 hover:bg-[#1A1A1A] hover:text-white border border-transparent"}`}>
                         <LayoutDashboard size={20} />
                         <span className="font-medium">Dashboard</span>
                       </Link>
-                      <Link href="/musteriler" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-[#1A1A1A] hover:text-white transition-colors">
+                      <Link href="/musteriler" className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${pathname === "/musteriler" ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)]" : "text-slate-400 hover:bg-[#1A1A1A] hover:text-white border border-transparent"}`}>
                         <Users size={20} />
                         <span className="font-medium">Müşteriler</span>
                       </Link>
-                      <Link href="/siparisler" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-[#1A1A1A] hover:text-white transition-colors">
+                      <Link href="/siparisler" className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${pathname === "/siparisler" ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)]" : "text-slate-400 hover:bg-[#1A1A1A] hover:text-white border border-transparent"}`}>
                         <ShoppingCart size={20} />
                         <span className="font-medium">Siparişler</span>
                       </Link>
-                      <Link href="/sevkiyat" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-[#1A1A1A] hover:text-white transition-colors">
+                      <Link href="/sevkiyat" className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${pathname === "/sevkiyat" ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)]" : "text-slate-400 hover:bg-[#1A1A1A] hover:text-white border border-transparent"}`}>
                         <PackageOpen size={20} />
                         <span className="font-medium">Sevkiyat</span>
                       </Link>
+                      {userRole === "Admin" && (
+                        <Link href="/kullanicilar" className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${pathname === "/kullanicilar" ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)]" : "text-slate-400 hover:bg-[#1A1A1A] hover:text-white border border-transparent"}`}>
+                          <UsersRound size={20} />
+                          <span className="font-medium">Kullanıcılar</span>
+                        </Link>
+                      )}
                     </>
                   )}
                   
-                  <Link href="/uretim" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-[#1A1A1A] hover:text-white transition-colors">
+                  <Link href="/uretim" className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${pathname === "/uretim" ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)]" : "text-slate-400 hover:bg-[#1A1A1A] hover:text-white border border-transparent"}`}>
                     <Factory size={20} />
                     <span className="font-medium">Üretim</span>
                   </Link>
-                  <Link href="/hammadde" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-[#1A1A1A] hover:text-white transition-colors">
+                  <Link href="/hammadde" className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${pathname === "/hammadde" ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)]" : "text-slate-400 hover:bg-[#1A1A1A] hover:text-white border border-transparent"}`}>
                     <PackageOpen size={20} />
                     <span className="font-medium">Hammadde Deposu</span>
                   </Link>

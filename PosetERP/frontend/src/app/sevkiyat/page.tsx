@@ -220,6 +220,14 @@ export default function SevkiyatPage() {
                   <span className="text-slate-500">Kalınlık:</span>
                   <span className="text-slate-300">{order.thicknessMicron} Mikron</span>
                 </div>
+                {order.totalPrice !== undefined && activeTab === "arsiv" && (
+                  <div className="flex justify-between items-center text-sm mt-2 pt-3 border-t border-[#222]">
+                    <span className="text-slate-500 font-medium">Kazanç:</span>
+                    <span className="text-emerald-400 font-bold drop-shadow-[0_0_8px_rgba(16,185,129,0.3)] text-base">
+                      ₺{order.totalPrice.toLocaleString('tr-TR')}
+                    </span>
+                  </div>
+                )}
               </div>
               
               {activeTab === "bekleyen" ? (

@@ -13,10 +13,25 @@ public class AppDbContext : DbContext
     public DbSet<RawMaterial> RawMaterials { get; set; } = null!;
     public DbSet<Order> Orders { get; set; } = null!;
     public DbSet<ProductionStage> ProductionStages { get; set; } = null!;
+    public DbSet<User> Users { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        // User
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Username).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.PasswordHash).IsRequired();
+            entity.Property(e => e.Role).IsRequired().HasMaxLength(20);
+
+            entity.HasData(
+                new User { Id = Guid.Parse("d5b0a3b2-6c39-4974-9844-3d0d62a22238"), Username = "admin", PasswordHash = "123456", Role = "Admin" },
+                new User { Id = Guid.Parse("f1a4ceab-1a40-4f51-8d26-78832a8a8e3f"), Username = "usta", PasswordHash = "123456", Role = "Usta" }
+            );
+        });
 
         // Customer
         modelBuilder.Entity<Customer>(entity =>
