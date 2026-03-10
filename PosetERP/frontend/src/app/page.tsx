@@ -6,6 +6,7 @@ import { fetchApi } from "../lib/api";
 import StockChart from "../components/StockChart";
 import OrderStatusChart from "../components/OrderStatusChart";
 import CriticalStockList from "../components/CriticalStockList";
+import CostProfitChart from "../components/CostProfitChart";
 import {
   TrendingUp,
   AlertTriangle,
@@ -14,6 +15,7 @@ import {
   ArrowRight,
   Loader2
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
@@ -28,6 +30,7 @@ export default function DashboardPage() {
   });
   
   const router = useRouter();
+  const t = useTranslations("Dashboard");
 
   useEffect(() => {
     // Role Guard
@@ -83,7 +86,7 @@ export default function DashboardPage() {
 
   const stats = [
     {
-      title: "Bekleyen Siparişler",
+      title: t("pendingOrders"),
       value: data.pendingOrdersCount.toString(),
       icon: TrendingUp,
       trend: "Sırada bekleyen",
@@ -93,7 +96,7 @@ export default function DashboardPage() {
       bg: "bg-[#111111]"
     },
     {
-      title: "Kritik Stok (Çeşit)",
+      title: t("criticalStock"),
       value: data.criticalStockCount.toString(),
       icon: AlertTriangle,
       trend: "İzleniyor",
@@ -103,7 +106,7 @@ export default function DashboardPage() {
       bg: "bg-[#111111]"
     },
     {
-      title: "Toplam Ciro",
+      title: t("totalRevenue"),
       value: `₺${data.totalRevenue.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`,
       icon: Wallet,
       trend: "Sistemde kayıtlı ciro",
@@ -113,7 +116,7 @@ export default function DashboardPage() {
       bg: "bg-[#111111]"
     },
     {
-      title: "Aktif Üretim",
+      title: t("activeProduction"),
       value: data.activeProductionCount.toString(),
       icon: Activity,
       trend: "Devam eden",
@@ -153,8 +156,8 @@ export default function DashboardPage() {
     <div className="max-w-7xl mx-auto space-y-8">
       {/* Header section */}
       <div>
-        <h2 className="text-2xl font-semibold text-white tracking-tight">Hoş Geldiniz, Alper</h2>
-        <p className="text-slate-400 mt-1">İşletmenizin bugünkü genel durumu.</p>
+        <h2 className="text-2xl font-semibold text-white tracking-tight">{t("welcome")}</h2>
+        <p className="text-slate-400 mt-1">{t("subtitle")}</p>
       </div>
 
       {loading ? (
@@ -199,21 +202,26 @@ export default function DashboardPage() {
           <StockChart data={data.rawMaterials} />
 
           {/* Status & Critical Analysis Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="h-[400px]">
-              <OrderStatusChart orders={data.allOrders} />
+          <div className="grid grid-cols-1 gap-6">
+            <div className="h-[400px] col-span-full">
+              <CostProfitChart orders={data.allOrders} />
             </div>
-            <div className="h-[400px]">
-              <CriticalStockList rawMaterials={data.rawMaterials} />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="h-full min-h-[400px]">
+                <OrderStatusChart orders={data.allOrders} />
+              </div>
+              <div className="h-full min-h-[400px]">
+                <CriticalStockList rawMaterials={data.rawMaterials} />
+              </div>
             </div>
           </div>
 
           {/* Recent Orders Table */}
           <div className="bg-[#111111] rounded-2xl border border-[#222] overflow-hidden shadow-2xl relative">
             <div className="p-6 border-b border-[#222] flex justify-between items-center bg-[#151515]">
-              <h3 className="text-lg font-semibold text-white">Son Siparişler</h3>
+              <h3 className="text-lg font-semibold text-white">{t("recentOrders")}</h3>
               <button className="text-sm font-medium text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-1 group">
-                Tümünü Gör
+                {t("viewAll")}
                 <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
               </button>
             </div>

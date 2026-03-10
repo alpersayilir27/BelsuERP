@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authFetch } from "../../lib/authFetch";
-import { Plus, ShoppingCart, Calendar, AlertCircle, X, Loader2, Play, FilePlus, ArrowRight, ClipboardList } from "lucide-react";
+import { Plus, ShoppingCart, Calendar, AlertCircle, X, Loader2, Play, FilePlus, ArrowRight, ClipboardList, Filter, ChevronLeft, ChevronRight } from "lucide-react";
 import { useToast } from "../../components/ToastProvider";
+import { ExportButtons } from "../../components/ExportButtons";
 
 interface Order {
   id: string;
@@ -31,6 +32,14 @@ export default function SiparislerPage() {
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -63,8 +72,13 @@ export default function SiparislerPage() {
     try {
       setLoading(true);
       
+      let ordersUrl = `http://localhost:5257/api/Orders?page=${page}&pageSize=${pageSize}`;
+      if (startDate) ordersUrl += `&startDate=${startDate}`;
+      if (endDate) ordersUrl += `&endDate=${endDate}`;
+      if (statusFilter && statusFilter !== "ALL") ordersUrl += `&status=${statusFilter}`;
+
       const [ordersRes, customersRes] = await Promise.all([
-        authFetch("http://localhost:5257/api/Orders"),
+        authFetch(ordersUrl),
         authFetch("http://localhost:5257/api/Customers")
       ]);
 
@@ -75,7 +89,12 @@ export default function SiparislerPage() {
       const ordersData = await ordersRes.json();
       const customersData = await customersRes.json();
       
-      setOrders(ordersData);
+      const items = Array.isArray(ordersData) ? ordersData : (ordersData.items || []);
+      setOrders(items);
+      if (!Array.isArray(ordersData)) {
+          setTotalPages(ordersData.totalPages || 1);
+          setTotalCount(ordersData.totalCount || items.length);
+      }
       setCustomers(customersData);
       setError(null);
     } catch (err: any) {
@@ -93,8 +112,11 @@ export default function SiparislerPage() {
       return;
     }
     
-    fetchData();
-  }, [router]);
+    const timeoutId = setTimeout(() => {
+      fetchData();
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  }, [router, page, startDate, endDate, statusFilter]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -254,14 +276,59 @@ export default function SiparislerPage() {
           <p className="text-slate-400 mt-1">Müşteri siparişlerini kaydedin ve üretim sürecini başlatın.</p>
         </div>
         
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="group relative px-6 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 font-medium rounded-xl border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)] hover:shadow-[0_0_25px_rgba(6,182,212,0.3)] transition-all duration-300 flex items-center gap-2 overflow-hidden"
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/0 via-cyan-400/10 to-cyan-400/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-          <Plus size={18} className="group-hover:rotate-90 transition-transform duration-300" />
-          <span>Yeni Sipariş Ekle</span>
-        </button>
+        <div className="flex items-center gap-3">
+          <ExportButtons 
+              excelUrl={`http://localhost:5257/api/Export/excel/orders?startDate=${startDate}&endDate=${endDate}&status=${statusFilter}`} 
+              excelFilename={`Siparisler_${new Date().toISOString().split('T')[0]}.xlsx`} 
+          />
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="group relative px-6 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 font-medium rounded-xl border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)] hover:shadow-[0_0_25px_rgba(6,182,212,0.3)] transition-all duration-300 flex items-center gap-2 overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/0 via-cyan-400/10 to-cyan-400/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+            <Plus size={18} className="group-hover:rotate-90 transition-transform duration-300" />
+            <span>Yeni Sipariş Ekle</span>
+          </button>
+        </div>
+      </div>
+
+      {/* FILTER BAR */}
+      <div className="bg-[#111111] p-4 rounded-2xl border border-[#222] flex flex-col sm:flex-row gap-4 items-center shadow-lg">
+        <div className="flex flex-col sm:flex-row gap-4 w-full">
+          <div className="flex flex-col gap-1 flex-1 sm:max-w-[200px]">
+            <label className="text-xs text-slate-500 font-medium ml-1">Durum Filtresi</label>
+            <select
+              value={statusFilter}
+              onChange={e => { setStatusFilter(e.target.value); setPage(1); }}
+              className="bg-[#0A0A0A] border border-[#333] rounded-lg px-3 py-2 text-sm text-slate-200 outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 w-full"
+            >
+              <option value="ALL">Tüm Durumlar</option>
+              <option value="Pending">Bekliyor</option>
+              <option value="InProduction">Üretimde</option>
+              <option value="Completed">Tamamlandı</option>
+              <option value="Shipped">Sevk Edildi</option>
+              <option value="Delivered">Teslim Edildi</option>
+            </select>
+          </div>
+          <div className="flex flex-col gap-1 flex-1 sm:max-w-[200px]">
+            <label className="text-xs text-slate-500 font-medium ml-1">Başlangıç Tarihi</label>
+            <input 
+              type="date" 
+              value={startDate}
+              onChange={e => { setStartDate(e.target.value); setPage(1); }}
+              className="bg-[#0A0A0A] border border-[#333] rounded-lg px-3 py-2 text-sm text-slate-200 outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 [color-scheme:dark] w-full"
+            />
+          </div>
+          <div className="flex flex-col gap-1 flex-1 sm:max-w-[200px]">
+            <label className="text-xs text-slate-500 font-medium ml-1">Bitiş Tarihi</label>
+            <input 
+              type="date" 
+              value={endDate}
+              onChange={e => { setEndDate(e.target.value); setPage(1); }}
+              className="bg-[#0A0A0A] border border-[#333] rounded-lg px-3 py-2 text-sm text-slate-200 outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 [color-scheme:dark] w-full"
+            />
+          </div>
+        </div>
       </div>
 
       <div className="bg-[#111111] rounded-2xl border border-[#222] shadow-2xl relative overflow-hidden min-h-[400px]">
@@ -369,6 +436,34 @@ export default function SiparislerPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* PAGINATION */}
+        {!loading && orders.length > 0 && totalPages > 1 && (
+          <div className="px-6 py-4 border-t border-[#222] bg-[#151515] flex items-center justify-between">
+            <span className="text-sm text-slate-400">
+              Toplam <span className="text-cyan-400 font-medium">{totalCount}</span> siparişten <span className="font-medium text-white">{(page - 1) * pageSize + 1} - {Math.min(page * pageSize, totalCount)}</span> arası gösteriliyor.
+            </span>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="p-2 bg-[#0A0A0A] border border-[#333] rounded-lg text-slate-400 hover:text-white hover:border-cyan-500/50 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+              >
+                <ChevronLeft size={18} />
+              </button>
+              <div className="flex items-center px-3 font-medium text-sm text-slate-300">
+                {page} / {totalPages}
+              </div>
+              <button 
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="p-2 bg-[#0A0A0A] border border-[#333] rounded-lg text-slate-400 hover:text-white hover:border-cyan-500/50 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+              >
+                <ChevronRight size={18} />
+              </button>
+            </div>
           </div>
         )}
       </div>

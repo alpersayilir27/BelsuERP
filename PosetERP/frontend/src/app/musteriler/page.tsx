@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authFetch } from "../../lib/authFetch";
-import { Plus, Building2, UserCircle, Phone, Wallet, AlertCircle, X, Loader2, UserCircle2, Pencil, Trash2 } from "lucide-react";
+import { Plus, Building2, UserCircle, Phone, Wallet, AlertCircle, X, Loader2, UserCircle2, Pencil, Trash2, Download } from "lucide-react";
 import { useToast } from "../../components/ToastProvider";
+import { ExportButtons } from "../../components/ExportButtons";
 
 interface Customer {
   id: string;
@@ -189,14 +190,20 @@ export default function MusterilerPage() {
           <p className="text-slate-400 mt-1">Kayıtlı tüm firmaları ve bakiye durumlarını yönetin.</p>
         </div>
         
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="group relative px-6 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 font-medium rounded-xl border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)] hover:shadow-[0_0_25px_rgba(6,182,212,0.3)] transition-all duration-300 flex items-center gap-2 overflow-hidden"
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/0 via-cyan-400/10 to-cyan-400/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-          <Plus size={18} className="group-hover:rotate-90 transition-transform duration-300" />
-          <span>Yeni Müşteri Ekle</span>
-        </button>
+        <div className="flex items-center gap-3">
+          <ExportButtons 
+            excelUrl="http://localhost:5257/api/Export/excel/customers" 
+            excelFilename={`Musteriler_${new Date().toISOString().split('T')[0]}.xlsx`} 
+          />
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="group relative px-6 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 font-medium rounded-xl border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)] hover:shadow-[0_0_25px_rgba(6,182,212,0.3)] transition-all duration-300 flex items-center gap-2 overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/0 via-cyan-400/10 to-cyan-400/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+            <Plus size={18} className="group-hover:rotate-90 transition-transform duration-300" />
+            <span>Yeni Müşteri Ekle</span>
+          </button>
+        </div>
       </div>
 
       <div className="bg-[#111111] rounded-2xl border border-[#222] shadow-2xl relative overflow-hidden min-h-[400px]">

@@ -1,0 +1,29 @@
+{
+  "Sidebar": {
+    "dashboard": "Dashboard",
+    "customers": "Müşteriler",
+    "orders": "Siparişler",
+    "shipping": "Sevkiyat",
+    "users": "Kullanıcılar",
+    "production": "Üretim",
+    "rawMaterial": "Hammadde Deposu",
+    "suppliers": "Tedarikçiler",
+    "auditLogs": "Sistem Kayıtları",
+    "logout": "Çıkış Yap"
+  },
+  "Dashboard": {
+    "welcome": "Hoş Geldiniz, Alper",
+    "subtitle": "İşletmenizin bugünkü genel durumu.",
+    "pendingOrders": "Bekleyen Siparişler",
+    "criticalStock": "Kritik Stok (Çeşit)",
+    "totalRevenue": "Toplam Ciro",
+    "activeProduction": "Aktif Üretim",
+    "recentOrders": "Son Siparişler",
+    "viewAll": "Tümünü Gör",
+    "statusDistribution": "Sipariş Durumu Dağılımı",
+    "financialAnalysis": "Maliyet & Kâr Analizi"
+  },
+  "Header": {
+    "admin": "Yönetici"
+  }
+}

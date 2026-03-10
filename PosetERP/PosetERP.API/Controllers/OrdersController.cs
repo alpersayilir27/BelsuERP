@@ -26,11 +26,30 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetOrders()
+    public async Task<IActionResult> GetOrders([FromQuery] int page = 1, [FromQuery] int pageSize = 100, [FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null, [FromQuery] string status = "ALL")
     {
-        var orders = await _context.Orders
-            .Include(o => o.Customer)
+        var query = _context.Orders.Include(o => o.Customer).AsQueryable();
+
+        if (startDate.HasValue)
+            query = query.Where(o => o.OrderDate >= startDate.Value.Date);
+
+        if (endDate.HasValue)
+            query = query.Where(o => o.OrderDate <= endDate.Value.Date.AddDays(1).AddTicks(-1));
+
+        if (!string.IsNullOrEmpty(status) && status != "ALL")
+        {
+            if (Enum.TryParse<OrderStatus>(status, true, out var parsedStatus))
+            {
+                query = query.Where(o => o.Status == parsedStatus);
+            }
+        }
+
+        var totalCount = await query.CountAsync();
+
+        var orders = await query
             .OrderByDescending(o => o.OrderDate)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .Select(o => new 
             {
                 o.Id,
@@ -47,7 +66,14 @@ public class OrdersController : ControllerBase
             })
             .ToListAsync();
             
-        return Ok(orders);
+        return Ok(new 
+        {
+            Items = orders,
+            TotalCount = totalCount,
+            Page = page,
+            PageSize = pageSize,
+            TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+        });
     }
 
     [HttpPost]
@@ -101,6 +127,7 @@ public class OrdersController : ControllerBase
         }
 
         order.Status = OrderStatus.Shipped;
+        order.NetProfit = (order.TotalPrice ?? 0) - (order.TotalCost ?? 0);
         await _context.SaveChangesAsync();
 
         return Ok(new { Message = "Sipariş teslim edildi ve arşivlendi." });

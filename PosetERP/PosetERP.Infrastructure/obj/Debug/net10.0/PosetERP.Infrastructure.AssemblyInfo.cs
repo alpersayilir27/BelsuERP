@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PosetERP.Infrastructure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b0a750a1e39bd18a90fae7939ca3ad93096e66ed")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+990113e9aaf7d53fc1144984ea24672ba9ca4890")]
 [assembly: System.Reflection.AssemblyProductAttribute("PosetERP.Infrastructure")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PosetERP.Infrastructure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -15,6 +15,7 @@ import {
   ArrowRight
 } from "lucide-react";
 import { useToast } from "../../components/ToastProvider";
+import { ExportButtons } from "../../components/ExportButtons";
 
 interface ProductionStage {
   id: string;
@@ -307,6 +308,14 @@ export default function UretimPage() {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
               </div>
             </div>
+          )}
+          
+          {/* Export Buttons - Only show in Uretim Gecmisi */}
+          {activeTab === "gecmis" && (
+            <ExportButtons 
+              excelUrl={`http://localhost:5257/api/Export/excel/production`} 
+              excelFilename={`Uretim_Gecmisi_${new Date().toISOString().split('T')[0]}.xlsx`} 
+            />
           )}
         </div>
       </div>

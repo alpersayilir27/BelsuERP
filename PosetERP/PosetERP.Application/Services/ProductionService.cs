@@ -22,7 +22,7 @@ public class ProductionService : IProductionService
     {
         try
         {
-            var stage = await _context.ProductionStages.FindAsync(stageId);
+            var stage = await _context.ProductionStages.Include(s => s.Order).FirstOrDefaultAsync(s => s.Id == stageId);
             if (stage == null)
             {
                 _logger.LogWarning($"ProductionStage with ID {stageId} not found.");
@@ -50,6 +50,13 @@ public class ProductionService : IProductionService
 
                 // Reduce stock
                 material.StockKg -= consumedAmountKg;
+                
+                // Add Cost to Order
+                if (stage.Order != null)
+                {
+                    stage.Order.TotalCost = (stage.Order.TotalCost ?? 0) + ((consumedAmountKg + wasteKg) * material.AverageCostPerKg);
+                }
+
                 _logger.LogInformation($"Consumed {consumedAmountKg}kg of material {material.Name} for stage {stageId}");
 
                 // Check minimum stock alert

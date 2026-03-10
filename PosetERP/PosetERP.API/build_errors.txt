@@ -1,0 +1,22 @@
+﻿  Geri y├╝klenecek projeler belirleniyor...
+  Geri y├╝kleme i├ğin t├╝m projeler g├╝ncel.
+  PosetERP.Domain -> C:\Users\Alper\Desktop\Po┼şet├£retimTakipProgram─▒\PosetERP\PosetERP.Domain\bin\Debug\net10.0\PosetERP.Domain.dll
+  PosetERP.Infrastructure -> C:\Users\Alper\Desktop\Po┼şet├£retimTakipProgram─▒\PosetERP\PosetERP.Infrastructure\bin\Debug\net10.0\PosetERP.Infrastructure.dll
+  PosetERP.Application -> C:\Users\Alper\Desktop\Po┼şet├£retimTakipProgram─▒\PosetERP\PosetERP.Application\bin\Debug\net10.0\PosetERP.Application.dll
+C:\Users\Alper\Desktop\Po┼şet├£retimTakipProgram─▒\PosetERP\PosetERP.API\Controllers\ProductionController.cs(31,35): warning CS8602: Olas─▒ bir null ba┼şvurunun ba┼şvurma i┼şlemi. [C:\Users\Alper\Desktop\Po┼şet├£retimTakipProgram─▒\PosetERP\PosetERP.API\PosetERP.API.csproj]
+C:\Users\Alper\Desktop\Po┼şet├£retimTakipProgram─▒\PosetERP\PosetERP.API\Controllers\ExportController.cs(69,42): error CS0019: '==' i┼şleci 'OrderStatus' ve 'string' t├╝r├╝ndeki i┼şlenenlere uygulanamaz [C:\Users\Alper\Desktop\Po┼şet├£retimTakipProgram─▒\PosetERP\PosetERP.API\PosetERP.API.csproj]
+C:\Users\Alper\Desktop\Po┼şet├£retimTakipProgram─▒\PosetERP\PosetERP.API\Controllers\ExportController.cs(97,48): error CS0029: 'PosetERP.Domain.Enums.BagType' t├╝r├╝ ├Ârt├╝l├╝ olarak 'ClosedXML.Excel.XLCellValue' t├╝r├╝ne d├Ân├╝┼şt├╝r├╝lemez [C:\Users\Alper\Desktop\Po┼şet├£retimTakipProgram─▒\PosetERP\PosetERP.API\PosetERP.API.csproj]
+C:\Users\Alper\Desktop\Po┼şet├£retimTakipProgram─▒\PosetERP\PosetERP.API\Controllers\ExportController.cs(103,48): error CS0029: 'PosetERP.Domain.Enums.OrderStatus' t├╝r├╝ ├Ârt├╝l├╝ olarak 'ClosedXML.Excel.XLCellValue' t├╝r├╝ne d├Ân├╝┼şt├╝r├╝lemez [C:\Users\Alper\Desktop\Po┼şet├£retimTakipProgram─▒\PosetERP\PosetERP.API\PosetERP.API.csproj]
+C:\Users\Alper\Desktop\Po┼şet├£retimTakipProgram─▒\PosetERP\PosetERP.API\Controllers\ExportController.cs(167,75): error CS0117: 'Colors.Grey' bir 'Light' tan─▒m─▒ i├ğermiyor [C:\Users\Alper\Desktop\Po┼şet├£retimTakipProgram─▒\PosetERP\PosetERP.API\PosetERP.API.csproj]
+
+Olu┼şturma BA┼ŞARISIZ OLDU.
+
+C:\Users\Alper\Desktop\Po┼şet├£retimTakipProgram─▒\PosetERP\PosetERP.API\Controllers\ProductionController.cs(31,35): warning CS8602: Olas─▒ bir null ba┼şvurunun ba┼şvurma i┼şlemi. [C:\Users\Alper\Desktop\Po┼şet├£retimTakipProgram─▒\PosetERP\PosetERP.API\PosetERP.API.csproj]
+C:\Users\Alper\Desktop\Po┼şet├£retimTakipProgram─▒\PosetERP\PosetERP.API\Controllers\ExportController.cs(69,42): error CS0019: '==' i┼şleci 'OrderStatus' ve 'string' t├╝r├╝ndeki i┼şlenenlere uygulanamaz [C:\Users\Alper\Desktop\Po┼şet├£retimTakipProgram─▒\PosetERP\PosetERP.API\PosetERP.API.csproj]
+C:\Users\Alper\Desktop\Po┼şet├£retimTakipProgram─▒\PosetERP\PosetERP.API\Controllers\ExportController.cs(97,48): error CS0029: 'PosetERP.Domain.Enums.BagType' t├╝r├╝ ├Ârt├╝l├╝ olarak 'ClosedXML.Excel.XLCellValue' t├╝r├╝ne d├Ân├╝┼şt├╝r├╝lemez [C:\Users\Alper\Desktop\Po┼şet├£retimTakipProgram─▒\PosetERP\PosetERP.API\PosetERP.API.csproj]
+C:\Users\Alper\Desktop\Po┼şet├£retimTakipProgram─▒\PosetERP\PosetERP.API\Controllers\ExportController.cs(103,48): error CS0029: 'PosetERP.Domain.Enums.OrderStatus' t├╝r├╝ ├Ârt├╝l├╝ olarak 'ClosedXML.Excel.XLCellValue' t├╝r├╝ne d├Ân├╝┼şt├╝r├╝lemez [C:\Users\Alper\Desktop\Po┼şet├£retimTakipProgram─▒\PosetERP\PosetERP.API\PosetERP.API.csproj]
+C:\Users\Alper\Desktop\Po┼şet├£retimTakipProgram─▒\PosetERP\PosetERP.API\Controllers\ExportController.cs(167,75): error CS0117: 'Colors.Grey' bir 'Light' tan─▒m─▒ i├ğermiyor [C:\Users\Alper\Desktop\Po┼şet├£retimTakipProgram─▒\PosetERP\PosetERP.API\PosetERP.API.csproj]
+    1 Uyar─▒
+    4 Hata
+
+Ge├ğen S├╝re 00:00:01.92

@@ -59,6 +59,7 @@ using PosetERP.Application.Interfaces;
 using PosetERP.Application.Services;
 using PosetERP.Infrastructure;
 
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 var builder = WebApplication.CreateBuilder(args);
 
 // Veritabanı Bağlantısı

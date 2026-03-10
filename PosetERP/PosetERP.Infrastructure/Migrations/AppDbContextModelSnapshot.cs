@@ -22,6 +22,41 @@ namespace PosetERP.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("PosetERP.Domain.Entities.AuditLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ActionType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EntityId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EntityName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NewValues")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OldValues")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AuditLogs");
+                });
+
             modelBuilder.Entity("PosetERP.Domain.Entities.Customer", b =>
                 {
                     b.Property<Guid>("Id")
@@ -68,6 +103,9 @@ namespace PosetERP.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<decimal?>("NetProfit")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
@@ -86,7 +124,10 @@ namespace PosetERP.Infrastructure.Migrations
                     b.Property<int>("ThicknessMicron")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("TotalPrice")
+                    b.Property<decimal?>("TotalCost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("TotalPrice")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -139,6 +180,9 @@ namespace PosetERP.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<decimal>("AverageCostPerKg")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("Category")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -159,6 +203,69 @@ namespace PosetERP.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("RawMaterials");
+                });
+
+            modelBuilder.Entity("PosetERP.Domain.Entities.RawMaterialPurchase", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("AmountKg")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("PurchaseDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("RawMaterialId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SupplierId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("TotalPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RawMaterialId");
+
+                    b.HasIndex("SupplierId");
+
+                    b.ToTable("RawMaterialPurchases");
+                });
+
+            modelBuilder.Entity("PosetERP.Domain.Entities.Supplier", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CompanyName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("ContactPerson")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Suppliers");
                 });
 
             modelBuilder.Entity("PosetERP.Domain.Entities.User", b =>
@@ -224,6 +331,25 @@ namespace PosetERP.Infrastructure.Migrations
                     b.Navigation("Order");
                 });
 
+            modelBuilder.Entity("PosetERP.Domain.Entities.RawMaterialPurchase", b =>
+                {
+                    b.HasOne("PosetERP.Domain.Entities.RawMaterial", "RawMaterial")
+                        .WithMany("Purchases")
+                        .HasForeignKey("RawMaterialId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PosetERP.Domain.Entities.Supplier", "Supplier")
+                        .WithMany("Purchases")
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("RawMaterial");
+
+                    b.Navigation("Supplier");
+                });
+
             modelBuilder.Entity("PosetERP.Domain.Entities.Customer", b =>
                 {
                     b.Navigation("Orders");
@@ -232,6 +358,16 @@ namespace PosetERP.Infrastructure.Migrations
             modelBuilder.Entity("PosetERP.Domain.Entities.Order", b =>
                 {
                     b.Navigation("ProductionStages");
+                });
+
+            modelBuilder.Entity("PosetERP.Domain.Entities.RawMaterial", b =>
+                {
+                    b.Navigation("Purchases");
+                });
+
+            modelBuilder.Entity("PosetERP.Domain.Entities.Supplier", b =>
+                {
+                    b.Navigation("Purchases");
                 });
 #pragma warning restore 612, 618
         }

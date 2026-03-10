@@ -14,6 +14,81 @@ public class AppDbContext : DbContext
     public DbSet<Order> Orders { get; set; } = null!;
     public DbSet<ProductionStage> ProductionStages { get; set; } = null!;
     public DbSet<User> Users { get; set; } = null!;
+    public DbSet<Supplier> Suppliers { get; set; } = null!;
+    public DbSet<RawMaterialPurchase> RawMaterialPurchases { get; set; } = null!;
+    public DbSet<AuditLog> AuditLogs { get; set; } = null!;
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        var auditEntries = new List<AuditLog>();
+        foreach (var entry in ChangeTracker.Entries())
+        {
+            if (entry.Entity is AuditLog || entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
+                continue;
+
+            var auditEntry = new AuditLog
+            {
+                Id = Guid.NewGuid(),
+                EntityName = entry.Entity.GetType().Name,
+                ActionType = entry.State.ToString(),
+                Timestamp = DateTime.UtcNow,
+                UserId = "System"
+            };
+
+            var key = entry.Properties.FirstOrDefault(p => p.Metadata.IsPrimaryKey());
+            if (key != null)
+            {
+                auditEntry.EntityId = key.CurrentValue?.ToString() ?? "";
+            }
+
+            if (entry.State == EntityState.Modified)
+            {
+                var oldValues = new System.Collections.Generic.Dictionary<string, object?>();
+                var newValues = new System.Collections.Generic.Dictionary<string, object?>();
+
+                foreach (var property in entry.Properties)
+                {
+                    if (property.IsModified)
+                    {
+                        oldValues[property.Metadata.Name] = property.OriginalValue;
+                        newValues[property.Metadata.Name] = property.CurrentValue;
+                    }
+                }
+                auditEntry.OldValues = System.Text.Json.JsonSerializer.Serialize(oldValues);
+                auditEntry.NewValues = System.Text.Json.JsonSerializer.Serialize(newValues);
+            }
+            else if (entry.State == EntityState.Added)
+            {
+                var newValues = new System.Collections.Generic.Dictionary<string, object?>();
+                foreach (var property in entry.Properties)
+                {
+                    newValues[property.Metadata.Name] = property.CurrentValue;
+                }
+                auditEntry.NewValues = System.Text.Json.JsonSerializer.Serialize(newValues);
+            }
+            else if (entry.State == EntityState.Deleted)
+            {
+                var oldValues = new System.Collections.Generic.Dictionary<string, object?>();
+                foreach (var property in entry.Properties)
+                {
+                    oldValues[property.Metadata.Name] = property.OriginalValue;
+                }
+                auditEntry.OldValues = System.Text.Json.JsonSerializer.Serialize(oldValues);
+            }
+
+            auditEntries.Add(auditEntry);
+        }
+
+        var result = await base.SaveChangesAsync(cancellationToken);
+        
+        if (auditEntries.Count > 0)
+        {
+            await AuditLogs.AddRangeAsync(auditEntries, cancellationToken);
+            await base.SaveChangesAsync(cancellationToken);
+        }
+        
+        return result;
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -41,6 +116,34 @@ public class AppDbContext : DbContext
             entity.Property(e => e.ContactPerson).HasMaxLength(150);
             entity.Property(e => e.PhoneNumber).HasMaxLength(50);
             entity.Property(e => e.Balance).HasPrecision(18, 2);
+        });
+
+        // RawMaterialPurchase
+        modelBuilder.Entity<RawMaterialPurchase>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.AmountKg).HasPrecision(18, 2);
+            entity.Property(e => e.UnitPrice).HasPrecision(18, 2);
+            entity.Property(e => e.TotalPrice).HasPrecision(18, 2);
+
+            entity.HasOne(e => e.Supplier)
+                  .WithMany(s => s.Purchases)
+                  .HasForeignKey(e => e.SupplierId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.RawMaterial)
+                  .WithMany(r => r.Purchases)
+                  .HasForeignKey(e => e.RawMaterialId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Supplier
+        modelBuilder.Entity<Supplier>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.CompanyName).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.ContactPerson).HasMaxLength(150);
+            entity.Property(e => e.PhoneNumber).HasMaxLength(50);
         });
 
         // RawMaterial

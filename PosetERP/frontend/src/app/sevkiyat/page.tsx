@@ -9,9 +9,11 @@ import {
   Loader2,
   Calendar,
   AlertCircle,
-  X
+  X,
+  FileSpreadsheet
 } from "lucide-react";
 import { useToast } from "../../components/ToastProvider";
+import { ExportButtons } from "../../components/ExportButtons";
 
 interface Order {
   id: string;
@@ -42,10 +44,11 @@ export default function SevkiyatPage() {
   const fetchCompletedOrders = async () => {
     try {
       setLoading(true);
-      const response = await authFetch("http://localhost:5257/api/orders");
+      const response = await authFetch("http://localhost:5257/api/orders?pageSize=500");
       if (!response.ok) throw new Error("Siparişler getirilemedi.");
       
-      const data: Order[] = await response.json();
+      const json = await response.json();
+      const data: Order[] = Array.isArray(json) ? json : (json.items || []);
       setOrders(data);
       setError(null);
     } catch (err: any) {
@@ -112,20 +115,26 @@ export default function SevkiyatPage() {
           </div>
         </div>
 
-        {/* TAB TOGGLE */}
-        <div className="flex bg-[#111111] border border-[#333] rounded-xl p-1 shrink-0 relative z-10 mt-4 sm:mt-0">
-          <button
-            onClick={() => setActiveTab("bekleyen")}
-            className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 ${activeTab === "bekleyen" ? "bg-cyan-500/20 text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.2)]" : "text-slate-400 hover:text-white"}`}
-          >
-            Bekleyen Sevkiyatlar
-          </button>
-          <button
-            onClick={() => setActiveTab("arsiv")}
-            className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 ${activeTab === "arsiv" ? "bg-cyan-500/20 text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.2)]" : "text-slate-400 hover:text-white"}`}
-          >
-            Sevkiyat Arşivi
-          </button>
+        {/* RIGHT CONTROLS: ACTIONS & TAB TOGGLE */}
+        <div className="flex flex-col sm:flex-row items-center justify-end gap-3 w-full sm:w-auto z-20 relative mt-4 sm:mt-0">
+          <ExportButtons 
+            excelUrl={`http://localhost:5257/api/Export/excel/orders?status=${activeTab === "arsiv" ? "Shipped" : "Completed"}`} 
+            excelFilename={`Sevkiyat_${activeTab}_${new Date().toISOString().split('T')[0]}.xlsx`} 
+          />
+          <div className="flex bg-[#111111] border border-[#333] rounded-xl p-1 shrink-0 h-[40px]">
+            <button
+              onClick={() => setActiveTab("bekleyen")}
+              className={`px-4 text-sm font-medium rounded-lg transition-all duration-300 h-full flex items-center ${activeTab === "bekleyen" ? "bg-cyan-500/20 text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.2)]" : "text-slate-400 hover:text-white"}`}
+            >
+              Bekleyen Sevkiyatlar
+            </button>
+            <button
+              onClick={() => setActiveTab("arsiv")}
+              className={`px-4 text-sm font-medium rounded-lg transition-all duration-300 h-full flex items-center ${activeTab === "arsiv" ? "bg-cyan-500/20 text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.2)]" : "text-slate-400 hover:text-white"}`}
+            >
+              Sevkiyat Arşivi
+            </button>
+          </div>
         </div>
       </div>
 
@@ -239,9 +248,15 @@ export default function SevkiyatPage() {
                   <span>Teslim Et / Arşivle</span>
                 </button>
               ) : (
-                <div className="mt-auto self-end flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#1A1A1A] border border-[#333] opacity-80 backdrop-blur-sm">
-                  <CheckCircle2 size={16} className="text-emerald-400" />
-                  <span className="text-xs font-medium text-slate-400 tracking-wide uppercase">Teslim Edildi</span>
+                <div className="flex items-center justify-between mt-auto">
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#1A1A1A] border border-[#333] opacity-80 backdrop-blur-sm">
+                    <CheckCircle2 size={16} className="text-emerald-400" />
+                    <span className="text-xs font-medium text-slate-400 tracking-wide uppercase">Teslim Edildi</span>
+                  </div>
+                  <ExportButtons 
+                    pdfUrl={`http://localhost:5257/api/Export/pdf/invoice/${order.id}`}
+                    pdfFilename={`Irsaliye_${order.id.substring(0,8)}.pdf`}
+                  />
                 </div>
               )}
             </div>

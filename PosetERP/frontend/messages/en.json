@@ -1,0 +1,29 @@
+{
+  "Sidebar": {
+    "dashboard": "Dashboard",
+    "customers": "Customers",
+    "orders": "Orders",
+    "shipping": "Shipping",
+    "users": "Users",
+    "production": "Production",
+    "rawMaterial": "Raw Materials",
+    "suppliers": "Suppliers",
+    "auditLogs": "Audit Logs",
+    "logout": "Logout"
+  },
+  "Dashboard": {
+    "welcome": "Welcome, Alper",
+    "subtitle": "Today's general status of your business.",
+    "pendingOrders": "Pending Orders",
+    "criticalStock": "Critical Stock",
+    "totalRevenue": "Total Revenue",
+    "activeProduction": "Active Production",
+    "recentOrders": "Recent Orders",
+    "viewAll": "View All",
+    "statusDistribution": "Order Status Distribution",
+    "financialAnalysis": "Cost & Profit Analysis"
+  },
+  "Header": {
+    "admin": "Administrator"
+  }
+}
