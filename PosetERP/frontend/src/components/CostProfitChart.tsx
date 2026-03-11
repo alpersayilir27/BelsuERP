@@ -103,15 +103,15 @@ export default function CostProfitChart({ orders }: CostProfitChartProps) {
           >
             <defs>
               <linearGradient id="colorCiro" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3}/>
+                <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.6}/>
                 <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
               </linearGradient>
               <linearGradient id="colorMaliyet" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.3}/>
+                <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.6}/>
                 <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
               </linearGradient>
               <linearGradient id="colorKar" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                <stop offset="5%" stopColor="#10b981" stopOpacity={0.6}/>
                 <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
               </linearGradient>
             </defs>
@@ -139,31 +139,31 @@ export default function CostProfitChart({ orders }: CostProfitChartProps) {
               wrapperStyle={{ fontSize: '12px', color: '#94a3b8' }}
             />
             <Area 
-              type="monotone" 
+              type="monotoneX" 
               dataKey="Ciro" 
               stroke="#06b6d4" 
-              strokeWidth={2}
+              strokeWidth={3}
               fillOpacity={1} 
               fill="url(#colorCiro)" 
-              activeDot={{ r: 6, strokeWidth: 0, fill: '#06b6d4', style: { filter: 'drop-shadow(0 0 8px rgba(6,182,212,0.8))' } }}
+              activeDot={{ r: 8, strokeWidth: 0, fill: '#06b6d4', style: { filter: 'drop-shadow(0 0 10px rgba(6,182,212,0.8))' } }}
             />
             <Area 
-              type="monotone" 
+              type="monotoneX" 
               dataKey="Maliyet" 
               stroke="#f43f5e" 
-              strokeWidth={2}
+              strokeWidth={3}
               fillOpacity={1} 
               fill="url(#colorMaliyet)" 
-              activeDot={{ r: 6, strokeWidth: 0, fill: '#f43f5e', style: { filter: 'drop-shadow(0 0 8px rgba(244,63,94,0.8))' } }}
+              activeDot={{ r: 8, strokeWidth: 0, fill: '#f43f5e', style: { filter: 'drop-shadow(0 0 10px rgba(244,63,94,0.8))' } }}
             />
             <Area 
-              type="monotone" 
+              type="monotoneX" 
               dataKey="Net Kâr" 
               stroke="#10b981" 
-              strokeWidth={2}
+              strokeWidth={3}
               fillOpacity={1} 
               fill="url(#colorKar)" 
-              activeDot={{ r: 6, strokeWidth: 0, fill: '#10b981', style: { filter: 'drop-shadow(0 0 8px rgba(16,185,129,0.8))' } }}
+              activeDot={{ r: 8, strokeWidth: 0, fill: '#10b981', style: { filter: 'drop-shadow(0 0 10px rgba(16,185,129,0.8))' } }}
             />
           </AreaChart>
         </ResponsiveContainer>

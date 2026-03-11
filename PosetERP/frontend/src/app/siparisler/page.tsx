@@ -18,6 +18,7 @@ interface Order {
   thicknessMicron: number;
   requestedAmountKg: number;
   totalPrice: number;
+  estimatedCost?: number;
   status: string;
 }
 
@@ -35,8 +36,7 @@ export default function SiparislerPage() {
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [targetDeliveryDateFilter, setTargetDeliveryDateFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -56,6 +56,7 @@ export default function SiparislerPage() {
     thicknessMicron: "",
     requestedAmountKg: "",
     totalPrice: "",
+    estimatedCost: "",
     targetDeliveryDate: "",
   });
   
@@ -73,8 +74,7 @@ export default function SiparislerPage() {
       setLoading(true);
       
       let ordersUrl = `http://localhost:5257/api/Orders?page=${page}&pageSize=${pageSize}`;
-      if (startDate) ordersUrl += `&startDate=${startDate}`;
-      if (endDate) ordersUrl += `&endDate=${endDate}`;
+      if (targetDeliveryDateFilter) ordersUrl += `&targetDeliveryDate=${targetDeliveryDateFilter}`;
       if (statusFilter && statusFilter !== "ALL") ordersUrl += `&status=${statusFilter}`;
 
       const [ordersRes, customersRes] = await Promise.all([
@@ -116,7 +116,7 @@ export default function SiparislerPage() {
       fetchData();
     }, 300);
     return () => clearTimeout(timeoutId);
-  }, [router, page, startDate, endDate, statusFilter]);
+  }, [router, page, targetDeliveryDateFilter, statusFilter]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -130,13 +130,14 @@ export default function SiparislerPage() {
   };
 
   const handleCurrencyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, ""); // Keep only digits
+    const { name, value: rawValue } = e.target;
+    const value = rawValue.replace(/\D/g, ""); // Keep only digits
     if (!value) {
-      setFormData((prev) => ({ ...prev, totalPrice: "" }));
+      setFormData((prev) => ({ ...prev, [name]: "" }));
       return;
     }
     const formatted = new Intl.NumberFormat("tr-TR").format(parseInt(value, 10));
-    setFormData((prev) => ({ ...prev, totalPrice: formatted }));
+    setFormData((prev) => ({ ...prev, [name]: formatted }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -156,6 +157,7 @@ export default function SiparislerPage() {
           thicknessMicron: Number(formData.thicknessMicron) || 0,
           requestedAmountKg: Number(formData.requestedAmountKg) || 0,
           totalPrice: Number(formData.totalPrice.replace(/\./g, "")) || 0,
+          estimatedCost: Number(formData.estimatedCost.replace(/\./g, "")) || 0,
         }),
       });
 
@@ -171,6 +173,7 @@ export default function SiparislerPage() {
         thicknessMicron: "",
         requestedAmountKg: "",
         totalPrice: "",
+        estimatedCost: "",
         targetDeliveryDate: "",
       });
       await fetchData();
@@ -278,7 +281,7 @@ export default function SiparislerPage() {
         
         <div className="flex items-center gap-3">
           <ExportButtons 
-              excelUrl={`http://localhost:5257/api/Export/excel/orders?startDate=${startDate}&endDate=${endDate}&status=${statusFilter}`} 
+              excelUrl={`http://localhost:5257/api/Export/excel/orders?targetDeliveryDate=${targetDeliveryDateFilter}&status=${statusFilter}`} 
               excelFilename={`Siparisler_${new Date().toISOString().split('T')[0]}.xlsx`} 
           />
           <button 
@@ -311,20 +314,11 @@ export default function SiparislerPage() {
             </select>
           </div>
           <div className="flex flex-col gap-1 flex-1 sm:max-w-[200px]">
-            <label className="text-xs text-slate-500 font-medium ml-1">Başlangıç Tarihi</label>
+            <label className="text-xs text-slate-500 font-medium ml-1">Teslim Tarihi</label>
             <input 
               type="date" 
-              value={startDate}
-              onChange={e => { setStartDate(e.target.value); setPage(1); }}
-              className="bg-[#0A0A0A] border border-[#333] rounded-lg px-3 py-2 text-sm text-slate-200 outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 [color-scheme:dark] w-full"
-            />
-          </div>
-          <div className="flex flex-col gap-1 flex-1 sm:max-w-[200px]">
-            <label className="text-xs text-slate-500 font-medium ml-1">Bitiş Tarihi</label>
-            <input 
-              type="date" 
-              value={endDate}
-              onChange={e => { setEndDate(e.target.value); setPage(1); }}
+              value={targetDeliveryDateFilter}
+              onChange={e => { setTargetDeliveryDateFilter(e.target.value); setPage(1); }}
               className="bg-[#0A0A0A] border border-[#333] rounded-lg px-3 py-2 text-sm text-slate-200 outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 [color-scheme:dark] w-full"
             />
           </div>
@@ -369,6 +363,7 @@ export default function SiparislerPage() {
                   <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Müşteri</th>
                   <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Poşet Tipi / Ebat</th>
                   <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">Miktar (Kg)</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">Maliyet</th>
                   <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">Tutar</th>
                   <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Teslim Tarihi</th>
                   <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider text-center">Durum</th>
@@ -398,6 +393,11 @@ export default function SiparislerPage() {
                     <td className="px-6 py-4 text-right">
                       <span className="text-sm font-semibold text-emerald-400">
                         {order.requestedAmountKg.toLocaleString('tr-TR')}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <span className="text-sm font-semibold text-rose-400 drop-shadow-[0_0_8px_rgba(244,63,94,0.3)]">
+                        {order.estimatedCost ? order.estimatedCost.toLocaleString('tr-TR') : "0"} ₺
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -599,7 +599,27 @@ export default function SiparislerPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label htmlFor="estimatedCost" className="text-sm font-medium text-slate-300">
+                    Tahmini Maliyet (₺)
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      id="estimatedCost"
+                      name="estimatedCost"
+                      value={formData.estimatedCost}
+                      onChange={handleCurrencyChange}
+                      className="w-full bg-[#0A0A0A] border border-[#333] rounded-xl pl-4 pr-10 py-2.5 text-rose-400 font-bold text-sm focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500/50 focus:shadow-[0_0_15px_rgba(244,63,94,0.2)] transition-all placeholder:text-rose-900/50"
+                      placeholder="0"
+                    />
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-rose-500 font-semibold">
+                      ₺
+                    </div>
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <label htmlFor="totalPrice" className="text-sm font-medium text-slate-300">
                     Toplam Tutar (₺)

@@ -29,6 +29,7 @@ public class ProductionController : ControllerBase
         var stages = await _context.ProductionStages
             .Include(ps => ps.Order)
                 .ThenInclude(o => o.Customer)
+            .Include(ps => ps.RawMaterial)
             .Select(ps => new
             {
                 ps.Id,
@@ -41,7 +42,9 @@ public class ProductionController : ControllerBase
                 StageType = ps.StageType.ToString(),
                 Status = ps.Status.ToString(),
                 ps.ConsumedMaterialKg,
-                ps.WasteKg
+                ps.WasteKg,
+                RawMaterialName = ps.RawMaterial != null ? ps.RawMaterial.Name : "",
+                ps.ProducedQuantity
             })
             .ToListAsync();
 
@@ -53,7 +56,7 @@ public class ProductionController : ControllerBase
     {
         try
         {
-            await _productionService.ConsumeMaterialAsync(stageId, request.MaterialId, request.ConsumedAmountKg, request.WasteKg);
+            await _productionService.ConsumeMaterialAsync(stageId, request.MaterialId, request.ConsumedAmountKg, request.WasteKg, request.ProducedQuantity);
             return Ok(new { Message = "Material consumed successfully.", StageId = stageId });
         }
         catch (InvalidOperationException ex)
@@ -90,4 +93,5 @@ public class ConsumeMaterialDto
     public Guid? MaterialId { get; set; }
     public decimal ConsumedAmountKg { get; set; }
     public decimal WasteKg { get; set; }
+    public decimal ProducedQuantity { get; set; }
 }

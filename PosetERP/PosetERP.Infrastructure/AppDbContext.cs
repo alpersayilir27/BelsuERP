@@ -162,6 +162,10 @@ public class AppDbContext : DbContext
             entity.Property(e => e.BagType).HasConversion<string>().HasMaxLength(50);
             entity.Property(e => e.Dimensions).HasMaxLength(100);
             entity.Property(e => e.RequestedAmountKg).HasPrecision(18, 2);
+            entity.Property(e => e.TotalPrice).HasPrecision(18, 2);
+            entity.Property(e => e.TotalCost).HasPrecision(18, 2);
+            entity.Property(e => e.EstimatedCost).HasPrecision(18, 2);
+            entity.Property(e => e.NetProfit).HasPrecision(18, 2);
             entity.Property(e => e.Status).HasConversion<string>().HasMaxLength(50);
 
             entity.HasOne(e => e.Customer)
@@ -178,11 +182,17 @@ public class AppDbContext : DbContext
             entity.Property(e => e.Status).HasConversion<string>().HasMaxLength(50);
             entity.Property(e => e.ConsumedMaterialKg).HasPrecision(18, 2);
             entity.Property(e => e.WasteKg).HasPrecision(18, 2);
+            entity.Property(e => e.ProducedQuantity).HasPrecision(18, 2);
 
             entity.HasOne(e => e.Order)
                   .WithMany(o => o.ProductionStages)
                   .HasForeignKey(e => e.OrderId)
                   .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.RawMaterial)
+                  .WithMany()
+                  .HasForeignKey(e => e.RawMaterialId)
+                  .OnDelete(DeleteBehavior.SetNull);
         });
     }
 }

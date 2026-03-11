@@ -27,6 +27,8 @@ interface ProductionStage {
   status: string;
   consumedMaterialKg: number;
   wasteKg: number;
+  rawMaterialName?: string;
+  producedQuantity?: number;
   targetDeliveryDate?: string;
   orderStatus?: string;
 }
@@ -56,6 +58,7 @@ export default function UretimPage() {
     materialId: "",
     consumedAmountKg: "",
     wasteKg: "",
+    producedQuantity: "",
   });
 
   const fetchData = async () => {
@@ -105,6 +108,7 @@ export default function UretimPage() {
       materialId: defaultMaterialId,
       consumedAmountKg: "",
       wasteKg: "",
+      producedQuantity: "",
     });
     setIsModalOpen(true);
   };
@@ -136,6 +140,7 @@ export default function UretimPage() {
           materialId: isCutting ? null : formData.materialId,
           consumedAmountKg: isCutting ? 0 : (Number(formData.consumedAmountKg) || 0),
           wasteKg: Number(formData.wasteKg) || 0,
+          producedQuantity: Number(formData.producedQuantity) || 0,
         }),
       });
 
@@ -232,6 +237,32 @@ export default function UretimPage() {
 
     const stage = stages.find(s => s.id === stageId);
     if (!stage || stage.status === newStatus) return;
+
+    // VALIDATION: Sequential Production
+    const isPrinting = stage.stageType === "Printing";
+    const isCutting = stage.stageType === "Cutting";
+
+    if (isPrinting) {
+      const extruderStage = stages.find(s => s.orderId === stage.orderId && s.stageType === "Extruder");
+      if (extruderStage && extruderStage.status !== "Finished") {
+        toast({ type: "error", title: "Sıralı Üretim Zorunluluğu", message: "Önceki üretim aşaması (Ekstruder) tamamlanmadan bu işleme geçemezsiniz!" });
+        return;
+      }
+    }
+    if (isCutting) {
+      const printingStage = stages.find(s => s.orderId === stage.orderId && s.stageType === "Printing");
+      if (printingStage && printingStage.status !== "Finished") {
+        toast({ type: "error", title: "Sıralı Üretim Zorunluluğu", message: "Önceki üretim aşaması (Matbaa) tamamlanmadan bu işleme geçemezsiniz!" });
+        return;
+      }
+      if (!printingStage) {
+        const extruderStage = stages.find(s => s.orderId === stage.orderId && s.stageType === "Extruder");
+        if (extruderStage && extruderStage.status !== "Finished") {
+          toast({ type: "error", title: "Sıralı Üretim Zorunluluğu", message: "Önceki üretim aşaması (Ekstruder) tamamlanmadan bu işleme geçemezsiniz!" });
+          return;
+        }
+      }
+    }
 
     if (newStatus === "Finished") {
       handleOpenModal(stage);
@@ -361,7 +392,9 @@ export default function UretimPage() {
                   <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Müşteri</th>
                   <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Poşet Tipi</th>
                   <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Tamamlanan Aşama</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">Harcanan Malzeme (Kg)</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Kullanılan Malzeme</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">Harcanan (Kg)</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">Üretilen (Kg)</th>
                   <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">Fire (Kg)</th>
                 </tr>
               </thead>
@@ -399,8 +432,14 @@ export default function UretimPage() {
                           <span className="text-sm">{getStageNameTr(stage.stageType)}</span>
                         </div>
                       </td>
+                      <td className="px-6 py-4">
+                        <span className="text-sm text-slate-300">{stage.rawMaterialName || "-"}</span>
+                      </td>
                       <td className="px-6 py-4 text-right">
                         <span className="text-sm font-semibold text-white drop-shadow-sm">{stage.consumedMaterialKg.toLocaleString('tr-TR')}</span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <span className="text-sm font-semibold text-cyan-400">{stage.producedQuantity?.toLocaleString('tr-TR') || "0"}</span>
                       </td>
                       <td className="px-6 py-4 text-right">
                         <span className="text-sm text-slate-400">{stage.wasteKg.toLocaleString('tr-TR')}</span>
@@ -692,6 +731,25 @@ export default function UretimPage() {
                       placeholder="0"
                     />
                   </div>
+                  
+                  <div className="space-y-2">
+                    <label htmlFor="producedQuantity" className="text-sm font-medium text-slate-300">
+                      Üretilen Miktar (Kg) <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      id="producedQuantity"
+                      name="producedQuantity"
+                      required
+                      min="0"
+                      step="0.1"
+                      value={formData.producedQuantity}
+                      onChange={handleInputChange}
+                      onKeyDown={preventInvalidNumberInput}
+                      className={`w-full bg-[#0A0A0A] border rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none transition-all placeholder:text-slate-600 ${Number(formData.producedQuantity) < 0 ? 'border-rose-500/50 focus:border-rose-500 focus:ring-1 focus:ring-rose-500/50' : 'border-[#333] focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50'}`}
+                      placeholder="0"
+                    />
+                  </div>
                 </div>
 
                 {/* Modal Actions */}
@@ -714,7 +772,9 @@ export default function UretimPage() {
                         isStockInsufficient ||
                         Number(formData.consumedAmountKg) < 0
                       )) ||
-                      Number(formData.wasteKg) < 0
+                      Number(formData.wasteKg) < 0 ||
+                      formData.producedQuantity === "" ||
+                      Number(formData.producedQuantity) < 0
                     }
                     className="px-5 py-2 flex items-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-[#050505] font-semibold rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >

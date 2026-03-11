@@ -40,8 +40,8 @@ public class OrderService : IOrderService
             // Update order status
             order.Status = OrderStatus.InProduction;
 
-            // Create production stages
-            var stages = new[]
+            // Create production stages conditionally
+            var stagesList = new List<ProductionStage>
             {
                 new ProductionStage
                 {
@@ -51,8 +51,12 @@ public class OrderService : IOrderService
                     Status = ProductionStatus.NotStarted,
                     ConsumedMaterialKg = 0,
                     WasteKg = 0
-                },
-                new ProductionStage
+                }
+            };
+
+            if (order.BagType != BagType.Baskisiz)
+            {
+                stagesList.Add(new ProductionStage
                 {
                     Id = Guid.NewGuid(),
                     OrderId = orderId,
@@ -60,17 +64,20 @@ public class OrderService : IOrderService
                     Status = ProductionStatus.NotStarted,
                     ConsumedMaterialKg = 0,
                     WasteKg = 0
-                },
-                new ProductionStage
-                {
-                    Id = Guid.NewGuid(),
-                    OrderId = orderId,
-                    StageType = StageType.Cutting,
-                    Status = ProductionStatus.NotStarted,
-                    ConsumedMaterialKg = 0,
-                    WasteKg = 0
-                }
-            };
+                });
+            }
+
+            stagesList.Add(new ProductionStage
+            {
+                Id = Guid.NewGuid(),
+                OrderId = orderId,
+                StageType = StageType.Cutting,
+                Status = ProductionStatus.NotStarted,
+                ConsumedMaterialKg = 0,
+                WasteKg = 0
+            });
+
+            var stages = stagesList.ToArray();
 
             await _context.ProductionStages.AddRangeAsync(stages);
             await _context.SaveChangesAsync();

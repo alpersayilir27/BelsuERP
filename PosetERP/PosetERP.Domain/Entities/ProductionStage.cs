@@ -10,7 +10,10 @@ public class ProductionStage
     public ProductionStatus Status { get; set; }
     public decimal ConsumedMaterialKg { get; set; }
     public decimal WasteKg { get; set; }
+    public decimal ProducedQuantity { get; set; }
     public DateTime? CompletedAt { get; set; }
 
     public Order? Order { get; set; }
+    public Guid? RawMaterialId { get; set; }
+    public RawMaterial? RawMaterial { get; set; }
 }

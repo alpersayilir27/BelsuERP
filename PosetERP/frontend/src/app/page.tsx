@@ -21,7 +21,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState({
     pendingOrdersCount: 0,
-    totalRevenue: 0,
+    totalProfit: 0,
     criticalStockCount: 0,
     activeProductionCount: 0,
     recentOrders: [] as any[],
@@ -57,7 +57,7 @@ export default function DashboardPage() {
         const productions = extractArray(productionRes);
 
         const pendingOrders = orders.filter((o: any) => o.status === 0 || o.status === 'Pending').length;
-        const totalRevenue = orders.reduce((sum: number, o: any) => sum + (o.totalPrice || 0), 0);
+        const totalProfit = orders.reduce((sum: number, o: any) => sum + ((o.totalPrice || 0) - (o.totalCost || 0)), 0);
         const criticalStocks = rawMaterials.filter((m: any) => m.stockKg < m.minimumStockAlert).length;
         const activeProductions = orders.filter((o: any) => o.status === 1 || o.status === 'InProduction').length;
 
@@ -67,7 +67,7 @@ export default function DashboardPage() {
 
         setData({
           pendingOrdersCount: pendingOrders,
-          totalRevenue: totalRevenue,
+          totalProfit: totalProfit,
           criticalStockCount: criticalStocks,
           activeProductionCount: activeProductions,
           recentOrders: sortedOrders,
@@ -106,10 +106,10 @@ export default function DashboardPage() {
       bg: "bg-[#111111]"
     },
     {
-      title: t("totalRevenue"),
-      value: `₺${data.totalRevenue.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`,
+      title: "Net Kâr",
+      value: `₺${data.totalProfit.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`,
       icon: Wallet,
-      trend: "Sistemde kayıtlı ciro",
+      trend: "Sistemde kayıtlı toplam kâr",
       trendColor: "text-emerald-400",
       glow: "shadow-[0_0_30px_rgba(16,185,129,0.15)]",
       iconColor: "text-emerald-400",
@@ -220,7 +220,7 @@ export default function DashboardPage() {
           <div className="bg-[#111111] rounded-2xl border border-[#222] overflow-hidden shadow-2xl relative">
             <div className="p-6 border-b border-[#222] flex justify-between items-center bg-[#151515]">
               <h3 className="text-lg font-semibold text-white">{t("recentOrders")}</h3>
-              <button className="text-sm font-medium text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-1 group">
+              <button onClick={() => router.push('/siparisler')} className="text-sm font-medium text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-1 group">
                 {t("viewAll")}
                 <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
               </button>

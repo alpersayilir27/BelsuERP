@@ -26,6 +26,7 @@ interface Order {
   thicknessMicron: number;
   requestedAmountKg: number;
   totalPrice?: number;
+  deliveryDate?: string;
   status: string;
 }
 
@@ -197,7 +198,7 @@ export default function SevkiyatPage() {
                       </span>
                     ) : (
                       <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                        {new Date().toLocaleDateString('tr-TR')}
+                        {order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString('tr-TR') : 'Arşivlendi'}
                       </span>
                     )}
                   </div>

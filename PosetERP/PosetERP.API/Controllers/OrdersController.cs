@@ -26,15 +26,12 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetOrders([FromQuery] int page = 1, [FromQuery] int pageSize = 100, [FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null, [FromQuery] string status = "ALL")
+    public async Task<IActionResult> GetOrders([FromQuery] int page = 1, [FromQuery] int pageSize = 100, [FromQuery] DateTime? targetDeliveryDate = null, [FromQuery] string status = "ALL")
     {
         var query = _context.Orders.Include(o => o.Customer).AsQueryable();
 
-        if (startDate.HasValue)
-            query = query.Where(o => o.OrderDate >= startDate.Value.Date);
-
-        if (endDate.HasValue)
-            query = query.Where(o => o.OrderDate <= endDate.Value.Date.AddDays(1).AddTicks(-1));
+        if (targetDeliveryDate.HasValue)
+            query = query.Where(o => o.TargetDeliveryDate.Date == targetDeliveryDate.Value.Date);
 
         if (!string.IsNullOrEmpty(status) && status != "ALL")
         {
@@ -62,6 +59,8 @@ public class OrdersController : ControllerBase
                 o.ThicknessMicron,
                 o.RequestedAmountKg,
                 o.TotalPrice,
+                o.EstimatedCost,
+                o.DeliveryDate,
                 Status = o.Status.ToString()
             })
             .ToListAsync();
@@ -92,6 +91,7 @@ public class OrdersController : ControllerBase
             ThicknessMicron = dto.ThicknessMicron,
             RequestedAmountKg = dto.RequestedAmountKg,
             TotalPrice = dto.TotalPrice,
+            EstimatedCost = dto.EstimatedCost,
             Status = OrderStatus.Pending
         };
 
@@ -128,6 +128,7 @@ public class OrdersController : ControllerBase
 
         order.Status = OrderStatus.Shipped;
         order.NetProfit = (order.TotalPrice ?? 0) - (order.TotalCost ?? 0);
+        order.DeliveryDate = DateTime.Now;
         await _context.SaveChangesAsync();
 
         return Ok(new { Message = "Sipariş teslim edildi ve arşivlendi." });
@@ -143,4 +144,5 @@ public class CreateOrderDto
     public int ThicknessMicron { get; set; }
     public decimal RequestedAmountKg { get; set; }
     public decimal TotalPrice { get; set; }
+    public decimal? EstimatedCost { get; set; }
 }

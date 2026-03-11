@@ -14,9 +14,10 @@ public class Order
     public decimal RequestedAmountKg { get; set; }
     public decimal? TotalPrice { get; set; }
     public decimal? TotalCost { get; set; }
+    public decimal? EstimatedCost { get; set; }
     public decimal? NetProfit { get; set; }
     public OrderStatus Status { get; set; }
-
+    public DateTime? DeliveryDate { get; set; }
 
     public Customer? Customer { get; set; }
     public ICollection<ProductionStage> ProductionStages { get; set; } = new List<ProductionStage>();

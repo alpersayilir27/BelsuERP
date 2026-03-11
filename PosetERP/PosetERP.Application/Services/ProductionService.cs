@@ -18,7 +18,7 @@ public class ProductionService : IProductionService
         _logger = logger;
     }
 
-    public async Task ConsumeMaterialAsync(Guid stageId, Guid? materialId, decimal consumedAmountKg, decimal wasteKg)
+    public async Task ConsumeMaterialAsync(Guid stageId, Guid? materialId, decimal consumedAmountKg, decimal wasteKg, decimal producedQuantity)
     {
         try
         {
@@ -29,12 +29,14 @@ public class ProductionService : IProductionService
                 return;
             }
 
-            // Update stage consumed material and waste
+            // Update stage consumed material, waste, and produced quantity
             stage.ConsumedMaterialKg += consumedAmountKg;
             stage.WasteKg += wasteKg;
+            stage.ProducedQuantity += producedQuantity;
 
             if (materialId.HasValue && materialId.Value != Guid.Empty)
             {
+                stage.RawMaterialId = materialId.Value;
                 var material = await _context.RawMaterials.FindAsync(materialId.Value);
                 if (material == null)
                 {
