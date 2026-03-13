@@ -115,6 +115,42 @@ public class OrdersController : ControllerBase
         }
     }
 
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateOrder(Guid id, [FromBody] UpdateOrderDto dto)
+    {
+        var order = await _context.Orders.FindAsync(id);
+        if (order == null) return NotFound(new { Error = "Sipariş bulunamadı." });
+
+        if (order.Status != OrderStatus.Pending)
+            return BadRequest(new { Error = "Sadece 'Bekliyor' durumundaki siparişler düzenlenebilir." });
+
+        order.CustomerId = dto.CustomerId;
+        order.TargetDeliveryDate = dto.TargetDeliveryDate;
+        order.BagType = dto.BagType;
+        order.Dimensions = dto.Dimensions;
+        order.ThicknessMicron = dto.ThicknessMicron;
+        order.RequestedAmountKg = dto.RequestedAmountKg;
+        order.TotalPrice = dto.TotalPrice;
+        order.EstimatedCost = dto.EstimatedCost;
+
+        await _context.SaveChangesAsync();
+        return Ok(new { Message = "Sipariş güncellendi." });
+    }
+
+    [HttpPost("{id}/cancel")]
+    public async Task<IActionResult> CancelOrder(Guid id)
+    {
+        var order = await _context.Orders.FindAsync(id);
+        if (order == null) return NotFound(new { Error = "Sipariş bulunamadı." });
+
+        if (order.Status != OrderStatus.Pending)
+            return BadRequest(new { Error = "Sadece 'Bekliyor' durumundaki siparişler iptal edilebilir." });
+
+        order.Status = OrderStatus.Cancelled;
+        await _context.SaveChangesAsync();
+        return Ok(new { Message = "Sipariş iptal edildi." });
+    }
+
     [HttpPost("{id}/deliver")]
     public async Task<IActionResult> DeliverOrder(Guid id)
     {
@@ -136,6 +172,18 @@ public class OrdersController : ControllerBase
 }
 
 public class CreateOrderDto
+{
+    public Guid CustomerId { get; set; }
+    public DateTime TargetDeliveryDate { get; set; }
+    public BagType BagType { get; set; }
+    public string? Dimensions { get; set; }
+    public int ThicknessMicron { get; set; }
+    public decimal RequestedAmountKg { get; set; }
+    public decimal TotalPrice { get; set; }
+    public decimal? EstimatedCost { get; set; }
+}
+
+public class UpdateOrderDto
 {
     public Guid CustomerId { get; set; }
     public DateTime TargetDeliveryDate { get; set; }
