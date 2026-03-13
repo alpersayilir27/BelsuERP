@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace PosetERP.API.Controllers;
 
-[Authorize(Roles = "Admin,Usta")]
+[Authorize(Roles = "Admin,Yonetici,Usta")]
 [ApiController]
 [Route("api/production")]
 public class ProductionController : ControllerBase

@@ -249,13 +249,19 @@ export default function KullanicilarPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <Shield size={14} className={user.role === 'Admin' ? 'text-cyan-400' : 'text-slate-500'} />
+                        <Shield size={14} className={
+                          user.role === 'Admin' ? 'text-cyan-400' 
+                          : user.role === 'Yonetici' ? 'text-violet-400'
+                          : 'text-slate-500'
+                        } />
                         <span className={`text-sm font-medium px-2 py-0.5 rounded-md border ${
                           user.role === 'Admin' 
                             ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' 
+                            : user.role === 'Yonetici'
+                            ? 'bg-violet-500/10 text-violet-400 border-violet-500/20'
                             : 'bg-[#222] text-slate-300 border-[#333]'
                         }`}>
-                          {user.role}
+                          {user.role === 'Yonetici' ? 'Yönetici' : user.role}
                         </span>
                       </div>
                     </td>
@@ -363,6 +369,7 @@ export default function KullanicilarPage() {
                     className="w-full bg-[#0A0A0A] border border-[#333] rounded-xl pl-10 pr-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 focus:shadow-[0_0_15px_rgba(6,182,212,0.2)] transition-all appearance-none"
                   >
                     <option value="Usta">Usta</option>
+                    <option value="Yonetici">Yönetici</option>
                     <option value="Admin">Admin</option>
                   </select>
                 </div>

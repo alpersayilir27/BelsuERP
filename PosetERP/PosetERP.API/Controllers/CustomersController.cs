@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace PosetERP.API.Controllers;
 
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Admin,Yonetici")]
 [ApiController]
 [Route("api/[controller]")]
 public class CustomersController : ControllerBase

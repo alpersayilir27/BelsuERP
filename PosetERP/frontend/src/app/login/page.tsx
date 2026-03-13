@@ -29,7 +29,8 @@ export default function LoginPage() {
         const data = await response.json();
         localStorage.setItem("token", data.token);
         localStorage.setItem("userRole", data.role);
-        localStorage.setItem("isLoggedIn", "true"); // keeping this for compatibility
+        localStorage.setItem("userName", data.username || username);
+        localStorage.setItem("isLoggedIn", "true");
         if (data.role === "Usta") {
           router.push("/uretim");
         } else {

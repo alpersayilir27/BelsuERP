@@ -43,7 +43,7 @@ namespace PosetERP.API.Controllers
                 var token = tokenHandler.CreateToken(tokenDescriptor);
                 var tokenString = tokenHandler.WriteToken(token);
 
-                return Ok(new { token = tokenString, role = user.Role });
+                return Ok(new { token = tokenString, role = user.Role, username = user.Username });
             }
 
             return Unauthorized(new { message = "Geçersiz kullanıcı adı veya şifre" });

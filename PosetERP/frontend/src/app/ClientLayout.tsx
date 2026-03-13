@@ -22,6 +22,7 @@ import { useTranslations } from "next-intl";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
   const tSidebar = useTranslations("Sidebar");
@@ -30,7 +31,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   useEffect(() => {
     if (pathname !== "/login") {
       const role = localStorage.getItem("userRole");
+      const name = localStorage.getItem("userName");
       setUserRole(role);
+      setUserName(name);
     }
   }, [pathname]);
 
@@ -88,6 +91,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                     <PackageOpen size={20} />
                     <span className="font-medium">{tSidebar("shipping")}</span>
                   </Link>
+                  {/* Sadece Admin: Kullanıcı Yönetimi + Sistem Kayıtları */}
                   {userRole === "Admin" && (
                     <>
                       <Link href="/kullanicilar" className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${pathname === "/kullanicilar" ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)]" : "text-slate-400 hover:bg-[#1A1A1A] hover:text-white border border-transparent"}`}>
@@ -150,8 +154,12 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               </button>
               <div className="flex items-center gap-3 pl-6 border-l border-[#333] cursor-pointer group">
                 <div className="text-right hidden sm:block">
-                  <p className="text-sm font-medium text-white group-hover:text-cyan-400 transition-colors">Alper Sayılır</p>
-                  <p className="text-xs text-slate-500">{tHeader("admin")}</p>
+                  <p className="text-sm font-medium text-white group-hover:text-cyan-400 transition-colors">
+                    {userName || "Kullanıcı"}
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    {userRole === "Admin" ? "Sistem Yöneticisi" : userRole === "Yonetici" ? "Yönetici" : userRole === "Usta" ? "Usta" : userRole ?? ""}
+                  </p>
                 </div>
                 <UserCircle size={36} className="text-slate-400 group-hover:text-cyan-400 transition-colors" />
               </div>
