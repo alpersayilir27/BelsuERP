@@ -12,7 +12,8 @@ import {
   X,
   PackageCheck,
   PackageOpen,
-  ArrowRight
+  ArrowRight,
+  ArrowUpDown, ArrowUp, ArrowDown, Search
 } from "lucide-react";
 import { useToast } from "../../components/ToastProvider";
 import { ExportButtons } from "../../components/ExportButtons";
@@ -49,6 +50,22 @@ export default function UretimPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Gecmis tab: search + sort
+  const [gecmisSearch, setGecmisSearch] = useState("");
+  type GecmisSortField = "customerName" | "bagType" | "stageType" | "rawMaterialName" | "consumedMaterialKg" | "producedQuantity" | "wasteKg";
+  const [gecmisSortField, setGecmisSortField] = useState<GecmisSortField>("customerName");
+  const [gecmisSortDir, setGecmisSortDir] = useState<"asc" | "desc">("asc");
+
+  const handleGecmisSort = (field: GecmisSortField) => {
+    if (gecmisSortField === field) setGecmisSortDir(d => d === "asc" ? "desc" : "asc");
+    else { setGecmisSortField(field); setGecmisSortDir("asc"); }
+  };
+
+  const GSortIcon = ({ field }: { field: GecmisSortField }) => {
+    if (gecmisSortField !== field) return <ArrowUpDown size={13} className="ml-1 opacity-30 inline" />;
+    return gecmisSortDir === "asc" ? <ArrowUp size={13} className="ml-1 text-cyan-400 inline" /> : <ArrowDown size={13} className="ml-1 text-cyan-400 inline" />;
+  };
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -384,30 +401,79 @@ export default function UretimPage() {
           )}
           {activeTab === "gecmis" ? (
             <div className="bg-[#111111] border border-[#222] rounded-2xl shadow-xl overflow-hidden">
+              {/* Gecmis Filter Bar */}
+              <div className="px-6 py-4 border-b border-[#222] bg-[#151515] flex items-center gap-3">
+                <div className="relative flex-1 max-w-xs">
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <input
+                    type="text"
+                    placeholder="Müşteri veya aşama ara..."
+                    value={gecmisSearch}
+                    onChange={e => setGecmisSearch(e.target.value)}
+                    className="w-full bg-[#0A0A0A] border border-[#333] rounded-lg pl-8 pr-3 py-1.5 text-sm text-slate-200 outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50"
+                  />
+                </div>
+                {gecmisSearch && (
+                  <button onClick={() => setGecmisSearch("")}
+                    className="text-xs text-slate-400 hover:text-rose-400 flex items-center gap-1 border border-[#333] rounded-lg px-2 py-1.5 transition-colors">
+                    <X size={12} /> Temizle
+                  </button>
+                )}
+              </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-[#0A0A0A] border-b border-[#222]">
                   <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Sipariş No</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Müşteri</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Poşet Tipi</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Tamamlanan Aşama</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Kullanılan Malzeme</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">Harcanan (Kg)</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">Üretilen (Kg)</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">Fire (Kg)</th>
+                  <th onClick={() => handleGecmisSort("customerName")} className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer select-none hover:text-cyan-400 transition-colors">
+                    Müşteri<GSortIcon field="customerName" />
+                  </th>
+                  <th onClick={() => handleGecmisSort("bagType")} className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer select-none hover:text-cyan-400 transition-colors">
+                    Poşet Tipi<GSortIcon field="bagType" />
+                  </th>
+                  <th onClick={() => handleGecmisSort("stageType")} className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer select-none hover:text-cyan-400 transition-colors">
+                    Tamamlanan Aşama<GSortIcon field="stageType" />
+                  </th>
+                  <th onClick={() => handleGecmisSort("rawMaterialName")} className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer select-none hover:text-cyan-400 transition-colors">
+                    Kullanılan Malzeme<GSortIcon field="rawMaterialName" />
+                  </th>
+                  <th onClick={() => handleGecmisSort("consumedMaterialKg")} className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer select-none hover:text-cyan-400 transition-colors text-right">
+                    Harcanan (Kg)<GSortIcon field="consumedMaterialKg" />
+                  </th>
+                  <th onClick={() => handleGecmisSort("producedQuantity")} className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer select-none hover:text-cyan-400 transition-colors text-right">
+                    Üretilen (Kg)<GSortIcon field="producedQuantity" />
+                  </th>
+                  <th onClick={() => handleGecmisSort("wasteKg")} className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer select-none hover:text-cyan-400 transition-colors text-right">
+                    Fire (Kg)<GSortIcon field="wasteKg" />
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#222]">
-                {stages
-                  .filter(s => s.status === "Finished" && (s.orderStatus === "Completed" || s.orderStatus === "Shipped" || s.orderStatus === "Delivered"))
-                  .sort((a, b) => {
-                    const orderIdCompare = a.orderId.localeCompare(b.orderId);
-                    if (orderIdCompare !== 0) return orderIdCompare;
-                    const stageOrderMapping: Record<string, number> = { "Extruder": 1, "Printing": 2, "Cutting": 3 };
-                    return (stageOrderMapping[a.stageType] || 99) - (stageOrderMapping[b.stageType] || 99);
-                  })
-                  .map((stage, idx, arr) => {
+                {(() => {
+                  const baseStages = stages
+                    .filter(s => s.status === "Finished" && (s.orderStatus === "Completed" || s.orderStatus === "Shipped" || s.orderStatus === "Delivered"));
+
+                  const searched = gecmisSearch
+                    ? baseStages.filter(s =>
+                        s.customerName.toLowerCase().includes(gecmisSearch.toLowerCase()) ||
+                        getStageNameTr(s.stageType).toLowerCase().includes(gecmisSearch.toLowerCase()) ||
+                        (s.rawMaterialName?.toLowerCase().includes(gecmisSearch.toLowerCase()) ?? false)
+                      )
+                    : baseStages;
+
+                  const sortedStages = [...searched].sort((a, b) => {
+                    let va: any = (a as any)[gecmisSortField] ?? "";
+                    let vb: any = (b as any)[gecmisSortField] ?? "";
+                    if (va < vb) return gecmisSortDir === "asc" ? -1 : 1;
+                    if (va > vb) return gecmisSortDir === "asc" ? 1 : -1;
+                    return 0;
+                  });
+
+                  if (sortedStages.length === 0) return (
+                    <tr><td colSpan={8} className="px-6 py-12 text-center text-slate-500 bg-[#111]">Geçmiş üretim kaydı bulunamadı.</td></tr>
+                  );
+
+                  return sortedStages.map((stage, idx, arr) => {
                     const isNewOrder = idx > 0 && arr[idx - 1].orderId !== stage.orderId;
                     return (
                     <tr key={stage.id} className={`hover:bg-[#1A1A1A]/50 transition-colors group ${isNewOrder ? 'border-t-2 border-[#444]' : ''}`}>
@@ -445,12 +511,8 @@ export default function UretimPage() {
                         <span className="text-sm text-slate-400">{stage.wasteKg.toLocaleString('tr-TR')}</span>
                       </td>
                     </tr>
-                  )})}
-                {stages.filter(s => s.status === "Finished" && (s.orderStatus === "Completed" || s.orderStatus === "Shipped" || s.orderStatus === "Delivered")).length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-slate-500 bg-[#111]">Geçmiş üretim kaydı bulunamadı.</td>
-                  </tr>
-                )}
+                  )});
+                })()}
               </tbody>
             </table>
           </div>

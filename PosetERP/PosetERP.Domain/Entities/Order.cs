@@ -2,7 +2,7 @@ using PosetERP.Domain.Enums;
 
 namespace PosetERP.Domain.Entities;
 
-public class Order
+public class Order : AuditableEntity
 {
     public Guid Id { get; set; }
     public Guid CustomerId { get; set; }
@@ -18,6 +18,7 @@ public class Order
     public decimal? NetProfit { get; set; }
     public OrderStatus Status { get; set; }
     public DateTime? DeliveryDate { get; set; }
+    public string? DeliveredBy { get; set; }
 
     public Customer? Customer { get; set; }
     public ICollection<ProductionStage> ProductionStages { get; set; } = new List<ProductionStage>();

@@ -162,9 +162,14 @@ public class OrdersController : ControllerBase
             return BadRequest(new { Error = "Siparişin teslim edilebilmesi için üretimi tamamlanmış (Completed) olması gerekir." });
         }
 
+        var deliveredBy = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value
+                       ?? User.FindFirst("name")?.Value
+                       ?? "System";
+
         order.Status = OrderStatus.Shipped;
         order.NetProfit = (order.TotalPrice ?? 0) - (order.TotalCost ?? 0);
         order.DeliveryDate = DateTime.Now;
+        order.DeliveredBy = deliveredBy;
         await _context.SaveChangesAsync();
 
         return Ok(new { Message = "Sipariş teslim edildi ve arşivlendi." });

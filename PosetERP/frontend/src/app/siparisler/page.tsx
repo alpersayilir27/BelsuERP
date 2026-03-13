@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { authFetch } from "../../lib/authFetch";
 import {
   Plus, ShoppingCart, Calendar, AlertCircle, X, Loader2, Play, Pencil,
-  Ban, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Filter
+  Ban, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Filter, Clock, UserCircle2
 } from "lucide-react";
 import { useToast } from "../../components/ToastProvider";
 import { ExportButtons } from "../../components/ExportButtons";
@@ -23,6 +23,10 @@ interface Order {
   totalPrice: number;
   estimatedCost?: number;
   status: string;
+  createdAt?: string;
+  createdBy?: string;
+  updatedAt?: string;
+  updatedBy?: string;
 }
 
 interface Customer {
@@ -456,6 +460,8 @@ export default function SiparislerPage() {
                       {col.label}<SortIcon field={col.key as SortField} />
                     </th>
                   ))}
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Oluşturan</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Son Güncelleme</th>
                   <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">İşlemler</th>
                 </tr>
               </thead>
@@ -489,6 +495,31 @@ export default function SiparislerPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-center">{renderStatusBadge(order.status)}</td>
+                    {/* Audit: Oluşturan */}
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-1.5 text-slate-400">
+                        <UserCircle2 size={13} className="text-slate-500" />
+                        <span className="text-xs">{order.createdBy || "—"}</span>
+                      </div>
+                      {order.createdAt && (
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <Clock size={11} className="text-slate-600" />
+                          <span className="text-xs text-slate-600">{new Date(order.createdAt).toLocaleDateString("tr-TR")}</span>
+                        </div>
+                      )}
+                    </td>
+                    {/* Audit: Son Guncelleme */}
+                    <td className="px-6 py-4">
+                      {order.updatedAt ? (
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <Clock size={13} className="text-slate-500" />
+                            <span className="text-xs text-slate-400">{new Date(order.updatedAt).toLocaleDateString("tr-TR")}</span>
+                          </div>
+                          <span className="text-xs text-slate-600 mt-0.5 block">{order.updatedBy}</span>
+                        </div>
+                      ) : <span className="text-xs text-slate-600">—</span>}
+                    </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         {/* Üretime Al — sadece Pending */}

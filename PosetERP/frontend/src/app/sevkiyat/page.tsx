@@ -28,6 +28,7 @@ interface Order {
   totalPrice?: number;
   deliveryDate?: string;
   status: string;
+  deliveredBy?: string;
 }
 
 export default function SevkiyatPage() {
@@ -250,9 +251,17 @@ export default function SevkiyatPage() {
                 </button>
               ) : (
                 <div className="flex items-center justify-between mt-auto">
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#1A1A1A] border border-[#333] opacity-80 backdrop-blur-sm">
-                    <CheckCircle2 size={16} className="text-emerald-400" />
-                    <span className="text-xs font-medium text-slate-400 tracking-wide uppercase">Teslim Edildi</span>
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#1A1A1A] border border-[#333] opacity-80 backdrop-blur-sm">
+                      <CheckCircle2 size={16} className="text-emerald-400" />
+                      <span className="text-xs font-medium text-slate-400 tracking-wide uppercase">Teslim Edildi</span>
+                    </div>
+                    {order.deliveredBy && (
+                      <div className="flex items-center gap-1.5 px-3 py-1 text-xs text-slate-500">
+                        <span className="text-slate-600">Onaylayan:</span>
+                        <span className="text-cyan-500 font-medium">{order.deliveredBy}</span>
+                      </div>
+                    )}
                   </div>
                   <ExportButtons 
                     pdfUrl={`http://localhost:5257/api/Export/pdf/invoice/${order.id}`}
