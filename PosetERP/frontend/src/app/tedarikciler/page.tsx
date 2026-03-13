@@ -87,21 +87,31 @@ export default function TedarikcilerPage() {
       if (isEditMode && editingId) {
         const res = await authFetch(`http://localhost:5257/api/Suppliers/${editingId}`, {
           method: "PUT",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id: editingId, ...formData })
         });
         if (res.ok) {
           toast({ type: "success", title: "Başarılı", message: "Tedarikçi güncellendi." });
           fetchSuppliers();
-        } else throw new Error();
+        } else {
+          const errText = await res.text();
+          console.error("Güncelleme hatası:", errText);
+          throw new Error(errText);
+        }
       } else {
         const res = await authFetch("http://localhost:5257/api/Suppliers", {
           method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData)
         });
         if (res.ok) {
-          toast({ type: "success", title: "Başarılı", message: "Yen tedarikçi eklendi." });
+          toast({ type: "success", title: "Başarılı", message: "Yeni tedarikçi eklendi." });
           fetchSuppliers();
-        } else throw new Error();
+        } else {
+          const errText = await res.text();
+          console.error("Ekleme hatası:", errText);
+          throw new Error(errText);
+        }
       }
       setIsModalOpen(false);
     } catch {
