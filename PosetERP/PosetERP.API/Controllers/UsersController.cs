@@ -63,9 +63,10 @@ namespace PosetERP.API.Controllers
             var user = _context.Users.Find(id);
             if (user == null) return NotFound(new { message = "Kullanıcı bulunamadı." });
 
-            if (user.Username != dto.Username && _context.Users.Any(u => u.Username == dto.Username))
+            // Aynı kullanıcı hariç, büyük/küçük harf fark etmeksizin duplicate kontrol
+            if (_context.Users.Any(u => u.Id != id && u.Username.ToLower() == dto.Username.ToLower()))
             {
-                return BadRequest(new { message = "Bu kullanıcı adı zaten kullanılıyor." });
+                return BadRequest(new { message = "Bu kullanıcı adı başka bir kullanıcı tarafından kullanılıyor." });
             }
 
             user.Username = dto.Username;

@@ -21,7 +21,15 @@ namespace PosetERP.API.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginDto loginDto)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Username == loginDto.Username && u.PasswordHash == loginDto.Password);
+            // Önce DB'de küçük harfe dönüştürüp bul (collation bağımsız)
+            var candidate = _context.Users.FirstOrDefault(u =>
+                u.Username.ToLower() == loginDto.Username.ToLower() &&
+                u.PasswordHash == loginDto.Password);
+
+            // Sonra C#'ta tam case-sensitive doğrulama (güvenlik katmanı)
+            var user = (candidate != null &&
+                        string.Equals(candidate.Username, loginDto.Username, StringComparison.Ordinal))
+                        ? candidate : null;
 
             if (user != null)
             {
