@@ -1,6 +1,6 @@
 namespace PosetERP.Domain.Entities;
 
-public class Customer
+public class Customer : AuditableEntity
 {
     public Guid Id { get; set; }
     public string CompanyName { get; set; } = string.Empty;

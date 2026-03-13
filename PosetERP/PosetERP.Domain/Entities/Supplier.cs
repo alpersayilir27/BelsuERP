@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace PosetERP.Domain.Entities
 {
-    public class Supplier
+    public class Supplier : AuditableEntity
     {
         public Guid Id { get; set; }
         public string CompanyName { get; set; } = string.Empty;

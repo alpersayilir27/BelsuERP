@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { authFetch } from "../../lib/authFetch";
-import { Plus, Store, Phone, Mail, AlertCircle, X, Loader2, Pencil, Trash2 } from "lucide-react";
+import { Plus, Store, Phone, Mail, AlertCircle, X, Loader2, Pencil, Trash2, ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight, UserCircle2, Clock } from "lucide-react";
 import { useToast } from "../../components/ToastProvider";
 
 interface Supplier {
@@ -11,12 +11,26 @@ interface Supplier {
   contactPerson: string | null;
   phoneNumber: string | null;
   email: string | null;
+  createdAt?: string;
+  createdBy?: string;
+  updatedAt?: string;
+  updatedBy?: string;
 }
+
+type SortField = "companyName" | "contactPerson" | "phoneNumber" | "email" | "createdBy" | "createdAt";
+type SortDir = "asc" | "desc";
+const PAGE_SIZE = 10;
 
 export default function TedarikcilerPage() {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+
+  // Sort / Filter / Pagination
+  const [searchFilter, setSearchFilter] = useState("");
+  const [sortField, setSortField] = useState<SortField>("companyName");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [page, setPage] = useState(1);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -31,6 +45,38 @@ export default function TedarikcilerPage() {
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) setSortDir(d => d === "asc" ? "desc" : "asc");
+    else { setSortField(field); setSortDir("asc"); }
+    setPage(1);
+  };
+
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (sortField !== field) return <ArrowUpDown size={13} className="ml-1 opacity-30 inline" />;
+    return sortDir === "asc" ? <ArrowUp size={13} className="ml-1 text-cyan-400 inline" /> : <ArrowDown size={13} className="ml-1 text-cyan-400 inline" />;
+  };
+
+  const fmtDate = (d?: string) => {
+    if (!d) return "—";
+    return new Date(d).toLocaleDateString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  };
+
+  const filtered = suppliers.filter(s =>
+    !searchFilter || s.companyName.toLowerCase().includes(searchFilter.toLowerCase()) ||
+    (s.contactPerson?.toLowerCase().includes(searchFilter.toLowerCase()) ?? false)
+  );
+
+  const sorted = [...filtered].sort((a, b) => {
+    let va: any = (a as any)[sortField] ?? "";
+    let vb: any = (b as any)[sortField] ?? "";
+    if (va < vb) return sortDir === "asc" ? -1 : 1;
+    if (va > vb) return sortDir === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+  const paginated = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   useEffect(() => {
     fetchSuppliers();
@@ -170,6 +216,22 @@ export default function TedarikcilerPage() {
         </button>
       </div>
 
+      {/* Filter Bar */}
+      <div className="bg-[#111111] p-4 rounded-2xl border border-[#222] flex flex-wrap gap-4 items-end shadow-lg">
+        <div className="flex flex-col gap-1 flex-1 min-w-[180px]">
+          <label className="text-xs text-slate-500 font-medium ml-1">Tedarikçi Ara</label>
+          <input type="text" placeholder="Firma adı veya yetkili..." value={searchFilter}
+            onChange={e => { setSearchFilter(e.target.value); setPage(1); }}
+            className="bg-[#0A0A0A] border border-[#333] rounded-lg px-3 py-2 text-sm text-slate-200 outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50" />
+        </div>
+        {searchFilter && (
+          <button onClick={() => { setSearchFilter(""); setPage(1); }}
+            className="text-xs text-slate-400 hover:text-rose-400 flex items-center gap-1 border border-[#333] hover:border-rose-500/30 rounded-lg px-3 py-2 transition-colors self-end">
+            <X size={12} /> Temizle
+          </button>
+        )}
+      </div>
+
       <div className="bg-[#111111] rounded-2xl border border-[#222] shadow-2xl relative overflow-hidden min-h-[400px]">
         {isLoading ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0a0a0a]/50 backdrop-blur-sm z-10">
@@ -186,15 +248,30 @@ export default function TedarikcilerPage() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-[#0A0A0A] border-b border-[#222]">
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Firma Adı</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">İletişim Kişisi</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Telefon</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">E-posta</th>
+                  <th onClick={() => handleSort("companyName")} className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer select-none hover:text-cyan-400 transition-colors">
+                    Firma Adı<SortIcon field="companyName" />
+                  </th>
+                  <th onClick={() => handleSort("contactPerson")} className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer select-none hover:text-cyan-400 transition-colors">
+                    İletişim Kişisi<SortIcon field="contactPerson" />
+                  </th>
+                  <th onClick={() => handleSort("phoneNumber")} className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer select-none hover:text-cyan-400 transition-colors">
+                    Telefon<SortIcon field="phoneNumber" />
+                  </th>
+                  <th onClick={() => handleSort("email")} className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer select-none hover:text-cyan-400 transition-colors">
+                    E-posta<SortIcon field="email" />
+                  </th>
+                  <th onClick={() => handleSort("createdBy")} className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer select-none hover:text-cyan-400 transition-colors">
+                    Oluşturan<SortIcon field="createdBy" />
+                  </th>
+                  <th onClick={() => handleSort("createdAt")} className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer select-none hover:text-cyan-400 transition-colors">
+                    Kayıt Tarihi<SortIcon field="createdAt" />
+                  </th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Son Güncelleme</th>
                   <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">İşlemler</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#222]/50 relative z-0">
-                {suppliers.map((supplier) => (
+                {paginated.map((supplier) => (
                   <tr key={supplier.id} className="hover:bg-[#151515] transition-colors group cursor-default">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -204,29 +281,37 @@ export default function TedarikcilerPage() {
                         <span className="font-medium text-slate-200 group-hover:text-white transition-colors">{supplier.companyName}</span>
                       </div>
                     </td>
+                    <td className="px-6 py-4"><span className="text-sm text-slate-400">{supplier.contactPerson || "-"}</span></td>
+                    <td className="px-6 py-4"><span className="text-sm font-mono text-slate-400">{supplier.phoneNumber || "-"}</span></td>
+                    <td className="px-6 py-4"><span className="text-sm font-mono text-slate-400">{supplier.email || "-"}</span></td>
                     <td className="px-6 py-4">
-                      <span className="text-sm text-slate-400">{supplier.contactPerson || "-"}</span>
+                      <div className="flex items-center gap-1.5 text-slate-400">
+                        <UserCircle2 size={13} className="text-slate-500" />
+                        <span className="text-xs">{supplier.createdBy || "—"}</span>
+                      </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-sm font-mono text-slate-400">{supplier.phoneNumber || "-"}</span>
+                      <div className="flex items-center gap-1.5 text-slate-400">
+                        <Clock size={13} className="text-slate-500" />
+                        <span className="text-xs">{fmtDate(supplier.createdAt)}</span>
+                      </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-sm font-mono text-slate-400">{supplier.email || "-"}</span>
+                      {supplier.updatedAt ? (
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-xs text-slate-400">{fmtDate(supplier.updatedAt)}</span>
+                          <span className="text-xs text-slate-600">{supplier.updatedBy}</span>
+                        </div>
+                      ) : <span className="text-xs text-slate-600">—</span>}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button 
-                          onClick={() => handleOpenModal(supplier)}
-                          className="p-2 text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-lg transition-colors border border-transparent hover:border-cyan-500/20"
-                          title="Düzenle"
-                        >
+                        <button onClick={() => handleOpenModal(supplier)}
+                          className="p-2 text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-lg transition-colors border border-transparent hover:border-cyan-500/20" title="Düzenle">
                           <Pencil size={16} />
                         </button>
-                        <button 
-                          onClick={() => confirmDelete(supplier.id)}
-                          className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors border border-transparent hover:border-rose-500/20"
-                          title="Sil"
-                        >
+                        <button onClick={() => confirmDelete(supplier.id)}
+                          className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors border border-transparent hover:border-rose-500/20" title="Sil">
                           <Trash2 size={16} />
                         </button>
                       </div>
@@ -235,6 +320,27 @@ export default function TedarikcilerPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* Pagination */}
+        {!isLoading && sorted.length > PAGE_SIZE && (
+          <div className="px-6 py-4 border-t border-[#222] bg-[#151515] flex items-center justify-between">
+            <span className="text-sm text-slate-400">
+              Toplam <span className="text-cyan-400 font-medium">{sorted.length}</span> tedarikçiden{" "}
+              <span className="font-medium text-white">{(page - 1) * PAGE_SIZE + 1} - {Math.min(page * PAGE_SIZE, sorted.length)}</span> arası.
+            </span>
+            <div className="flex gap-2">
+              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+                className="p-2 bg-[#0A0A0A] border border-[#333] rounded-lg text-slate-400 hover:text-white hover:border-cyan-500/50 transition-colors disabled:opacity-50 disabled:pointer-events-none">
+                <ChevronLeft size={18} />
+              </button>
+              <div className="flex items-center px-3 font-medium text-sm text-slate-300">{page} / {totalPages}</div>
+              <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+                className="p-2 bg-[#0A0A0A] border border-[#333] rounded-lg text-slate-400 hover:text-white hover:border-cyan-500/50 transition-colors disabled:opacity-50 disabled:pointer-events-none">
+                <ChevronRight size={18} />
+              </button>
+            </div>
           </div>
         )}
       </div>

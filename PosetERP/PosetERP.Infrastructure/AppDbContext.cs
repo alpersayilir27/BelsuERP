@@ -1,12 +1,18 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using PosetERP.Domain.Entities;
+using System.Security.Claims;
 
 namespace PosetERP.Infrastructure;
 
 public class AppDbContext : DbContext
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    private readonly IHttpContextAccessor? _httpContextAccessor;
+
+    public AppDbContext(DbContextOptions<AppDbContext> options, IHttpContextAccessor? httpContextAccessor = null)
+        : base(options)
     {
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public DbSet<Customer> Customers { get; set; } = null!;
@@ -18,8 +24,37 @@ public class AppDbContext : DbContext
     public DbSet<RawMaterialPurchase> RawMaterialPurchases { get; set; } = null!;
     public DbSet<AuditLog> AuditLogs { get; set; } = null!;
 
+    private string GetCurrentUser()
+    {
+        var user = _httpContextAccessor?.HttpContext?.User;
+        return user?.FindFirst(ClaimTypes.Name)?.Value
+            ?? user?.FindFirst("name")?.Value
+            ?? "System";
+    }
+
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
+        var now = DateTime.UtcNow;
+        var currentUser = GetCurrentUser();
+
+        // Audit alanlarını otomatik doldur
+        foreach (var entry in ChangeTracker.Entries<AuditableEntity>())
+        {
+            if (entry.State == EntityState.Added)
+            {
+                entry.Entity.CreatedAt = now;
+                entry.Entity.CreatedBy = currentUser;
+            }
+            else if (entry.State == EntityState.Modified)
+            {
+                entry.Entity.UpdatedAt = now;
+                entry.Entity.UpdatedBy = currentUser;
+                // CreatedAt/CreatedBy'ı değiştirme
+                entry.Property(e => e.CreatedAt).IsModified = false;
+                entry.Property(e => e.CreatedBy).IsModified = false;
+            }
+        }
+
         var auditEntries = new List<AuditLog>();
         foreach (var entry in ChangeTracker.Entries())
         {
@@ -31,21 +66,18 @@ public class AppDbContext : DbContext
                 Id = Guid.NewGuid(),
                 EntityName = entry.Entity.GetType().Name,
                 ActionType = entry.State.ToString(),
-                Timestamp = DateTime.UtcNow,
-                UserId = "System"
+                Timestamp = now,
+                UserId = currentUser
             };
 
             var key = entry.Properties.FirstOrDefault(p => p.Metadata.IsPrimaryKey());
             if (key != null)
-            {
                 auditEntry.EntityId = key.CurrentValue?.ToString() ?? "";
-            }
 
             if (entry.State == EntityState.Modified)
             {
-                var oldValues = new System.Collections.Generic.Dictionary<string, object?>();
-                var newValues = new System.Collections.Generic.Dictionary<string, object?>();
-
+                var oldValues = new Dictionary<string, object?>();
+                var newValues = new Dictionary<string, object?>();
                 foreach (var property in entry.Properties)
                 {
                     if (property.IsModified)
@@ -59,20 +91,16 @@ public class AppDbContext : DbContext
             }
             else if (entry.State == EntityState.Added)
             {
-                var newValues = new System.Collections.Generic.Dictionary<string, object?>();
+                var newValues = new Dictionary<string, object?>();
                 foreach (var property in entry.Properties)
-                {
                     newValues[property.Metadata.Name] = property.CurrentValue;
-                }
                 auditEntry.NewValues = System.Text.Json.JsonSerializer.Serialize(newValues);
             }
             else if (entry.State == EntityState.Deleted)
             {
-                var oldValues = new System.Collections.Generic.Dictionary<string, object?>();
+                var oldValues = new Dictionary<string, object?>();
                 foreach (var property in entry.Properties)
-                {
                     oldValues[property.Metadata.Name] = property.OriginalValue;
-                }
                 auditEntry.OldValues = System.Text.Json.JsonSerializer.Serialize(oldValues);
             }
 
@@ -80,13 +108,13 @@ public class AppDbContext : DbContext
         }
 
         var result = await base.SaveChangesAsync(cancellationToken);
-        
+
         if (auditEntries.Count > 0)
         {
             await AuditLogs.AddRangeAsync(auditEntries, cancellationToken);
             await base.SaveChangesAsync(cancellationToken);
         }
-        
+
         return result;
     }
 

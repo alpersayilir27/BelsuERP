@@ -67,6 +67,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Servis Kayıtları (Dependency Injection)
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IProductionService, ProductionService>();
 builder.Services.AddControllers();

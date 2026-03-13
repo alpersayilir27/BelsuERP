@@ -1,12 +1,14 @@
 {
   "version": 2,
-  "dgSpecHash": "cZ+Yn3WJJF4=",
+  "dgSpecHash": "JK8So34gVU0=",
   "success": true,
   "projectFilePath": "C:\\Users\\Alper\\Desktop\\PoşetÜretimTakipProgramı\\PosetERP\\PosetERP.Application\\PosetERP.Application.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Alper\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\Alper\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",
     "C:\\Users\\Alper\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
+    "C:\\Users\\Alper\\.nuget\\packages\\microsoft.aspnetcore.http.abstractions\\2.3.9\\microsoft.aspnetcore.http.abstractions.2.3.9.nupkg.sha512",
+    "C:\\Users\\Alper\\.nuget\\packages\\microsoft.aspnetcore.http.features\\2.3.0\\microsoft.aspnetcore.http.features.2.3.0.nupkg.sha512",
     "C:\\Users\\Alper\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\7.0.0\\microsoft.bcl.asyncinterfaces.7.0.0.nupkg.sha512",
     "C:\\Users\\Alper\\.nuget\\packages\\microsoft.bcl.cryptography\\9.0.0\\microsoft.bcl.cryptography.9.0.0.nupkg.sha512",
     "C:\\Users\\Alper\\.nuget\\packages\\microsoft.build.framework\\17.8.3\\microsoft.build.framework.17.8.3.nupkg.sha512",
