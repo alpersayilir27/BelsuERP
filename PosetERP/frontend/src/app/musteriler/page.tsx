@@ -153,7 +153,28 @@ export default function MusterilerPage() {
       });
 
       if (!response.ok) {
-        throw new Error("Müşteri silinirken bir hata oluştu.");
+        let errorMsg = "";
+        try {
+          const errorJson = await response.json();
+          errorMsg = errorJson?.message || errorJson?.error || JSON.stringify(errorJson);
+        } catch {
+          errorMsg = await response.text();
+        }
+
+        const isActiveOrderError =
+          response.status === 409 ||
+          errorMsg.toLowerCase().includes("order") ||
+          errorMsg.toLowerCase().includes("sipari") ||
+          errorMsg.toLowerCase().includes("saving the entity") ||
+          errorMsg.toLowerCase().includes("foreign key") ||
+          errorMsg.toLowerCase().includes("reference");
+
+        if (isActiveOrderError) {
+          throw new Error(
+            `'${customerToDelete.name}' müşterisine ait aktif siparişler mevcut olduğu için bu müşteri silinemiyor. Silmeden önce lütfen ilgili siparişleri tamamlayın veya iptal edin.`
+          );
+        }
+        throw new Error("Müşteri silinirken beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.");
       }
 
       await fetchCustomers();
