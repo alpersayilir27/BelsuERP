@@ -61,7 +61,11 @@ public class OrdersController : ControllerBase
                 o.TotalPrice,
                 o.EstimatedCost,
                 o.DeliveryDate,
-                Status = o.Status.ToString()
+                Status = o.Status.ToString(),
+                o.CreatedBy,
+                o.CreatedAt,
+                o.UpdatedBy,
+                o.UpdatedAt
             })
             .ToListAsync();
             
@@ -92,7 +96,9 @@ public class OrdersController : ControllerBase
             RequestedAmountKg = dto.RequestedAmountKg,
             TotalPrice = dto.TotalPrice,
             EstimatedCost = dto.EstimatedCost,
-            Status = OrderStatus.Pending
+            Status = OrderStatus.Pending,
+            CreatedBy = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? User.FindFirst("name")?.Value ?? "Bilinmiyor",
+            CreatedAt = DateTime.Now
         };
 
         _context.Orders.Add(order);
@@ -132,6 +138,8 @@ public class OrdersController : ControllerBase
         order.RequestedAmountKg = dto.RequestedAmountKg;
         order.TotalPrice = dto.TotalPrice;
         order.EstimatedCost = dto.EstimatedCost;
+        order.UpdatedBy = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? User.FindFirst("name")?.Value ?? "Bilinmiyor";
+        order.UpdatedAt = DateTime.Now;
 
         await _context.SaveChangesAsync();
         return Ok(new { Message = "Sipariş güncellendi." });
@@ -147,6 +155,8 @@ public class OrdersController : ControllerBase
             return BadRequest(new { Error = "Sadece 'Bekliyor' durumundaki siparişler iptal edilebilir." });
 
         order.Status = OrderStatus.Cancelled;
+        order.UpdatedBy = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? User.FindFirst("name")?.Value ?? "Bilinmiyor";
+        order.UpdatedAt = DateTime.Now;
         await _context.SaveChangesAsync();
         return Ok(new { Message = "Sipariş iptal edildi." });
     }
@@ -170,6 +180,8 @@ public class OrdersController : ControllerBase
         order.NetProfit = (order.TotalPrice ?? 0) - (order.TotalCost ?? 0);
         order.DeliveryDate = DateTime.Now;
         order.DeliveredBy = deliveredBy;
+        order.UpdatedBy = deliveredBy;
+        order.UpdatedAt = DateTime.Now;
         await _context.SaveChangesAsync();
 
         return Ok(new { Message = "Sipariş teslim edildi ve arşivlendi." });
