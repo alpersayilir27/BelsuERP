@@ -10,7 +10,10 @@ import {
   Calendar,
   AlertCircle,
   X,
-  FileSpreadsheet
+  FileSpreadsheet,
+  LayoutGrid,
+  List,
+  UserCheck
 } from "lucide-react";
 import { useToast } from "../../components/ToastProvider";
 import { ExportButtons } from "../../components/ExportButtons";
@@ -37,6 +40,7 @@ export default function SevkiyatPage() {
   const [error, setError] = useState<string | null>(null);
   
   const [activeTab, setActiveTab] = useState<"bekleyen" | "arsiv">("bekleyen");
+  const [archiveView, setArchiveView] = useState<"card" | "list">("card");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -100,6 +104,8 @@ export default function SevkiyatPage() {
     }
   };
 
+  const filteredOrders = orders.filter(o => activeTab === "bekleyen" ? o.status === "Completed" : o.status === "Shipped");
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto h-full flex flex-col blur-0 transition-all duration-300">
       
@@ -119,6 +125,27 @@ export default function SevkiyatPage() {
 
         {/* RIGHT CONTROLS: ACTIONS & TAB TOGGLE */}
         <div className="flex flex-col sm:flex-row items-center justify-end gap-3 w-full sm:w-auto z-20 relative mt-4 sm:mt-0">
+          
+          {/* View Toggle (Only in Archive) */}
+          {activeTab === "arsiv" && (
+            <div className="flex bg-[#111111] border border-[#333] rounded-xl p-1 h-[40px]">
+              <button
+                onClick={() => setArchiveView("card")}
+                className={`p-1.5 rounded-lg transition-all duration-300 ${archiveView === "card" ? "bg-cyan-500/20 text-cyan-400" : "text-slate-500 hover:text-slate-300"}`}
+                title="Kart Görünümü"
+              >
+                <LayoutGrid size={18} />
+              </button>
+              <button
+                onClick={() => setArchiveView("list")}
+                className={`p-1.5 rounded-lg transition-all duration-300 ${archiveView === "list" ? "bg-cyan-500/20 text-cyan-400" : "text-slate-500 hover:text-slate-300"}`}
+                title="Liste Görünümü"
+              >
+                <List size={18} />
+              </button>
+            </div>
+          )}
+
           <ExportButtons 
             excelUrl={`http://localhost:5257/api/Export/excel/orders?status=${activeTab === "arsiv" ? "Shipped" : "Completed"}`} 
             excelFilename={`Sevkiyat_${activeTab}_${new Date().toISOString().split('T')[0]}.xlsx`} 
@@ -163,116 +190,163 @@ export default function SevkiyatPage() {
               <Loader2 size={16} className="text-cyan-500 animate-spin" />
             </div>
           )}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {orders.filter(o => activeTab === "bekleyen" ? o.status === "Completed" : o.status === "Shipped").length === 0 && !error ? (
-          <div className="col-span-full flex flex-col items-center justify-center p-12 bg-[#111111] border border-[#222] rounded-2xl border-dashed">
-            <div className="w-16 h-16 bg-[#1A1A1A] rounded-full flex items-center justify-center mb-4">
-              <CheckCircle2 size={32} className="text-slate-500" />
+          
+          {filteredOrders.length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-12 bg-[#111111] border border-[#222] rounded-2xl border-dashed">
+              <div className="w-16 h-16 bg-[#1A1A1A] rounded-full flex items-center justify-center mb-4">
+                <CheckCircle2 size={32} className="text-slate-500" />
+              </div>
+              <h3 className="text-lg font-medium text-white mb-2 pb-2">
+                {activeTab === "bekleyen" ? "Sevkiyat Bekleyen Sipariş Yok" : "Arşivde Sipariş Yok"}
+              </h3>
+              <p className="text-slate-500 text-sm text-center max-w-sm">
+                {activeTab === "bekleyen" 
+                  ? "Tüm üretim süreçleri tamamlanan bir sipariş olduğunda burada teslimat için listelenecektir." 
+                  : "Henüz teslim edilerek arşive kaldırılmış bir sipariş bulunmuyor."}
+              </p>
             </div>
-            <h3 className="text-lg font-medium text-white mb-2 pb-2">
-              {activeTab === "bekleyen" ? "Sevkiyat Bekleyen Sipariş Yok" : "Arşivde Sipariş Yok"}
-            </h3>
-            <p className="text-slate-500 text-sm text-center max-w-sm">
-              {activeTab === "bekleyen" 
-                ? "Tüm üretim süreçleri tamamlanan bir sipariş olduğunda burada teslimat için listelenecektir." 
-                : "Henüz teslim edilerek arşive kaldırılmış bir sipariş bulunmuyor."}
-            </p>
-          </div>
-        ) : (
-          orders
-            .filter(o => activeTab === "bekleyen" ? o.status === "Completed" : o.status === "Shipped")
-            .map(order => (
-            <div key={order.id} className="bg-[#111111] border border-[#222] rounded-2xl p-6 flex flex-col hover:border-cyan-500/30 transition-all hover:shadow-[0_4px_20px_rgba(6,182,212,0.1)] group relative">
-              
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h3 className="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors">
-                    {order.customerName}
-                  </h3>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#222] text-slate-300 border border-[#333]">
-                      {order.bagType}
-                    </span>
-                    {activeTab === "bekleyen" ? (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                        Üretim Bitti
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                        {order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString('tr-TR') : 'Arşivlendi'}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-3 mb-6 flex-1">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-slate-500 flex items-center gap-2">
-                    <PackageOpen size={14} /> Miktar:
-                  </span>
-                  <span className="text-white font-medium">{order.requestedAmountKg.toLocaleString('tr-TR')} Kg</span>
-                </div>
-                {order.targetDeliveryDate && (
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-slate-500 flex items-center gap-2">
-                      <Calendar size={14} /> Teslim Tarihi:
-                    </span>
-                    <span className="text-slate-300 font-medium">{new Date(order.targetDeliveryDate).toLocaleDateString('tr-TR')}</span>
-                  </div>
-                )}
-                {order.dimensions && (
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-slate-500">Ebat:</span>
-                    <span className="text-slate-300">{order.dimensions}</span>
-                  </div>
-                )}
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-slate-500">Kalınlık:</span>
-                  <span className="text-slate-300">{order.thicknessMicron} Mikron</span>
-                </div>
-                {order.totalPrice !== undefined && activeTab === "arsiv" && (
-                  <div className="flex justify-between items-center text-sm mt-2 pt-3 border-t border-[#222]">
-                    <span className="text-slate-500 font-medium">Kazanç:</span>
-                    <span className="text-emerald-400 font-bold drop-shadow-[0_0_8px_rgba(16,185,129,0.3)] text-base">
-                      ₺{order.totalPrice.toLocaleString('tr-TR')}
-                    </span>
-                  </div>
-                )}
-              </div>
-              
-              {activeTab === "bekleyen" ? (
-                <button
-                  onClick={() => handleOpenModal(order)}
-                  className="w-full py-2.5 bg-gradient-to-r from-emerald-500/10 to-emerald-400/10 hover:from-emerald-500 hover:to-emerald-400 text-emerald-400 hover:text-[#050505] font-semibold rounded-xl border border-emerald-500/20 hover:border-transparent hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all flex items-center justify-center gap-2"
-                >
-                  <Truck size={18} />
-                  <span>Teslim Et / Arşivle</span>
-                </button>
-              ) : (
-                <div className="flex items-center justify-between mt-auto">
-                  <div className="flex flex-col gap-1.5">
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#1A1A1A] border border-[#333] opacity-80 backdrop-blur-sm">
-                      <CheckCircle2 size={16} className="text-emerald-400" />
-                      <span className="text-xs font-medium text-slate-400 tracking-wide uppercase">Teslim Edildi</span>
+          ) : activeTab === "arsiv" && archiveView === "list" ? (
+            /* LIST VIEW (TABLE) */
+            <div className="bg-[#111111] rounded-2xl border border-[#222] shadow-2xl overflow-hidden">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-[#0A0A0A] border-b border-[#222]">
+                    <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-tighter">Sipariş No</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-tighter">Müşteri</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-tighter">Ebat / Kalınlık</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-tighter text-right">Miktar (Kg)</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-tighter text-right">Kazanç (₺)</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-tighter text-center">Teslim Tarihi</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-tighter">Teslim Eden</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-tighter text-right">Fatura</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#222]">
+                  {filteredOrders.map(order => (
+                    <tr key={order.id} className="hover:bg-[#151515] transition-colors group">
+                      <td className="px-6 py-4 text-sm font-mono text-cyan-500">#{order.id.substring(0, 8).toUpperCase()}</td>
+                      <td className="px-6 py-4 text-sm font-medium text-white capitalize">{order.customerName}</td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-slate-300">{order.dimensions || '-'}</div>
+                        <div className="text-[10px] text-slate-500">{order.thicknessMicron} Mikron / {order.bagType}</div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-right font-semibold text-slate-200">{order.requestedAmountKg.toLocaleString('tr-TR')} Kg</td>
+                      <td className="px-6 py-4 text-sm text-right font-bold text-emerald-400">₺{(order.totalPrice || 0).toLocaleString('tr-TR')}</td>
+                      <td className="px-6 py-4 text-sm text-center text-slate-400">
+                        {order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString('tr-TR') : '-'}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2 text-sm text-slate-300">
+                          <UserCheck size={14} className="text-cyan-500" />
+                          {order.deliveredBy || "Bilinmiyor"}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <ExportButtons 
+                          pdfUrl={`http://localhost:5257/api/Export/pdf/invoice/${order.id}`}
+                          pdfFilename={`Irsaliye_${order.id.substring(0,8)}.pdf`}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            /* CARD VIEW (Current Default) */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredOrders.map(order => (
+                <div key={order.id} className="bg-[#111111] border border-[#222] rounded-2xl p-6 flex flex-col hover:border-cyan-500/30 transition-all hover:shadow-[0_4px_20px_rgba(6,182,212,0.1)] group relative">
+                  
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h3 className="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors">
+                        {order.customerName}
+                      </h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#222] text-slate-300 border border-[#333]">
+                          {order.bagType}
+                        </span>
+                        {activeTab === "bekleyen" ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                            Üretim Bitti
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                            {order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString('tr-TR') : 'Arşivlendi'}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    {order.deliveredBy && (
-                      <div className="flex items-center gap-1.5 px-3 py-1 text-xs text-slate-500">
-                        <span className="text-slate-600">Onaylayan:</span>
-                        <span className="text-cyan-500 font-medium">{order.deliveredBy}</span>
+                  </div>
+
+                  <div className="space-y-3 mb-6 flex-1">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-slate-500 flex items-center gap-2">
+                        <PackageOpen size={14} /> Miktar:
+                      </span>
+                      <span className="text-white font-medium">{order.requestedAmountKg.toLocaleString('tr-TR')} Kg</span>
+                    </div>
+                    {order.targetDeliveryDate && (
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-slate-500 flex items-center gap-2">
+                          <Calendar size={14} /> Teslim Tarihi:
+                        </span>
+                        <span className="text-slate-300 font-medium">{new Date(order.targetDeliveryDate).toLocaleDateString('tr-TR')}</span>
+                      </div>
+                    )}
+                    {order.dimensions && (
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-slate-500">Ebat:</span>
+                        <span className="text-slate-300">{order.dimensions}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-slate-500">Kalınlık:</span>
+                      <span className="text-slate-300">{order.thicknessMicron} Mikron</span>
+                    </div>
+                    {order.totalPrice !== undefined && activeTab === "arsiv" && (
+                      <div className="flex justify-between items-center text-sm mt-2 pt-3 border-t border-[#222]">
+                        <span className="text-slate-500 font-medium">Kazanç:</span>
+                        <span className="text-emerald-400 font-bold drop-shadow-[0_0_8px_rgba(16,185,129,0.3)] text-base">
+                          ₺{order.totalPrice.toLocaleString('tr-TR')}
+                        </span>
                       </div>
                     )}
                   </div>
-                  <ExportButtons 
-                    pdfUrl={`http://localhost:5257/api/Export/pdf/invoice/${order.id}`}
-                    pdfFilename={`Irsaliye_${order.id.substring(0,8)}.pdf`}
-                  />
+                  
+                  {activeTab === "bekleyen" ? (
+                    <button
+                      onClick={() => handleOpenModal(order)}
+                      className="w-full py-2.5 bg-gradient-to-r from-emerald-500/10 to-emerald-400/10 hover:from-emerald-500 hover:to-emerald-400 text-emerald-400 hover:text-[#050505] font-semibold rounded-xl border border-emerald-500/20 hover:border-transparent hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all flex items-center justify-center gap-2"
+                    >
+                      <Truck size={18} />
+                      <span>Teslim Et / Arşivle</span>
+                    </button>
+                  ) : (
+                    <div className="flex items-center justify-between mt-auto">
+                      <div className="flex flex-col gap-1.5">
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#1A1A1A] border border-[#333] opacity-80 backdrop-blur-sm">
+                          <CheckCircle2 size={16} className="text-emerald-400" />
+                          <span className="text-xs font-medium text-slate-400 tracking-wide uppercase">Teslim Edildi</span>
+                        </div>
+                        {order.deliveredBy && (
+                          <div className="flex items-center gap-1.5 px-3 py-1 text-xs text-slate-500">
+                            <span className="text-slate-600">Onaylayan:</span>
+                            <span className="text-cyan-500 font-medium">{order.deliveredBy}</span>
+                          </div>
+                        )}
+                      </div>
+                      <ExportButtons 
+                        pdfUrl={`http://localhost:5257/api/Export/pdf/invoice/${order.id}`}
+                        pdfFilename={`Irsaliye_${order.id.substring(0,8)}.pdf`}
+                      />
+                    </div>
+                  )}
                 </div>
-              )}
+              ))}
             </div>
-          ))
-        )}
-        </div>
+          )}
         </div>
       )}
 

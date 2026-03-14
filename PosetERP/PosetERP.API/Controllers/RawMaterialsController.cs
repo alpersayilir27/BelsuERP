@@ -102,6 +102,19 @@ public class RawMaterialsController : ControllerBase
                 return NotFound();
             }
 
+            // Hammaddenin kullanılıp kullanılmadığını kontrol et
+            var isUsedInProduction = await _context.ProductionStages.AnyAsync(ps => ps.RawMaterialId == id);
+            if (isUsedInProduction)
+            {
+                return BadRequest("Bu hammadde üretim geçmişinde kullanıldığı için silinemez.");
+            }
+
+            var isUsedInPurchases = await _context.RawMaterialPurchases.AnyAsync(rp => rp.RawMaterialId == id);
+            if (isUsedInPurchases)
+            {
+                return BadRequest("Bu hammadde satın alma geçmişinde (faturalarda) kullanıldığı için silinemez.");
+            }
+
             _context.RawMaterials.Remove(material);
             await _context.SaveChangesAsync();
             return NoContent();

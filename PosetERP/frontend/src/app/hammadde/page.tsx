@@ -188,7 +188,12 @@ export default function HammaddePage() {
     try {
       setIsDeleting(true);
       const response = await authFetch(`http://localhost:5257/api/RawMaterials/${deleteTarget.id}`, { method: "DELETE" });
-      if (!response.ok) throw new Error("Hammadde silinirken bir hata oluştu.");
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Hammadde silinirken bir hata oluştu.");
+      }
+      
       await fetchMaterials();
       setDeleteTarget(null);
       toast({ type: "success", title: "Silme İşlemi Başarılı", message: `'${deleteTarget.name}' listeden kaldırıldı.` });
