@@ -21,6 +21,7 @@ interface RawMaterial {
   name: string;
   stockKg: number;
   minimumStockAlert: number;
+  unit?: string;
 }
 
 interface StockChartProps {
@@ -44,7 +45,8 @@ export default function StockChart({ data }: StockChartProps) {
     return data.map(item => ({
       name: item.name || "Bilinmiyor",
       value: Number(item.stockKg ?? (item as any).StockKg ?? 0),
-      isCritical: Number(item.stockKg ?? (item as any).StockKg ?? 0) < Number(item.minimumStockAlert ?? (item as any).MinimumStockAlert ?? 0)
+      isCritical: Number(item.stockKg ?? (item as any).StockKg ?? 0) < Number(item.minimumStockAlert ?? (item as any).MinimumStockAlert ?? 0),
+      unit: item.unit || "Kg"
     }));
   }, [data]);
 
@@ -61,7 +63,7 @@ export default function StockChart({ data }: StockChartProps) {
       <div className="flex justify-between items-start mb-6">
         <div>
           <h3 className="text-lg font-semibold text-white">Hammadde Stok Durumu</h3>
-          <p className="text-sm text-slate-400 mt-1">Sistemde kayıtlı olan hammaddelerin güncel stok miktarları (Kg).</p>
+          <p className="text-sm text-slate-400 mt-1">Sistemde kayıtlı olan hammaddelerin güncel stok miktarları.</p>
         </div>
 
         {/* Toggle UI */}
@@ -117,7 +119,7 @@ export default function StockChart({ data }: StockChartProps) {
                 fontSize={11} 
                 tickLine={false} 
                 axisLine={false}
-                tickFormatter={(value) => `${value} kg`}
+                tickFormatter={(value) => `${value}`}
               />
               <Tooltip
                 cursor={{ fill: '#1a1a1a' }}
@@ -129,7 +131,7 @@ export default function StockChart({ data }: StockChartProps) {
                 }}
                 itemStyle={{ color: '#06b6d4', fontWeight: 500 }}
                 labelStyle={{ color: '#94a3b8', marginBottom: '8px' }}
-                formatter={(value: any) => [`${value} Kg`, 'Miktar']}
+                formatter={(value: any, name: any, props: any) => [`${value} ${props.payload.unit || 'Kg'}`, 'Miktar']}
               />
               <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={50}>
                 {mappedData.map((entry, index) => (
@@ -170,7 +172,7 @@ export default function StockChart({ data }: StockChartProps) {
                 }}
                 itemStyle={{ fontWeight: 500 }}
                 labelStyle={{ color: '#94a3b8' }}
-                formatter={(value: any) => [`${value} Kg`, 'Miktar']}
+                formatter={(value: any, name: any, props: any) => [`${value} ${props.payload.unit || 'Kg'}`, 'Miktar']}
               />
               <Legend 
                 verticalAlign="bottom" 

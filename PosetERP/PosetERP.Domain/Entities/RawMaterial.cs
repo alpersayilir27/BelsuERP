@@ -8,6 +8,7 @@ public class RawMaterial : AuditableEntity
     public decimal MinimumStockAlert { get; set; }
     public decimal AverageCostPerKg { get; set; } = 0;
     public string Category { get; set; } = "Granül";
+    public string Unit { get; set; } = "Kg";
 
     public ICollection<RawMaterialPurchase> Purchases { get; set; } = new List<RawMaterialPurchase>();
 }

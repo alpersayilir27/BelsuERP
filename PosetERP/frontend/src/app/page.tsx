@@ -60,7 +60,8 @@ export default function DashboardPage() {
           id: m.id || m.Id,
           name: m.name || m.Name || "Bilinmiyor",
           stockKg: Number(m.stockKg ?? m.StockKg ?? 0),
-          minimumStockAlert: Number(m.minimumStockAlert ?? m.MinimumStockAlert ?? 0)
+          minimumStockAlert: Number(m.minimumStockAlert ?? m.MinimumStockAlert ?? 0),
+          unit: m.unit || m.Unit || "Kg"
         }));
         const productions = extractArray(productionRes);
 

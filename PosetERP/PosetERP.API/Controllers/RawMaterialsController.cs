@@ -81,6 +81,7 @@ public class RawMaterialsController : ControllerBase
             material.StockKg = updateDto.StockKg;
             material.MinimumStockAlert = updateDto.MinimumStockAlert;
             material.Category = updateDto.Category ?? "Granül";
+            material.Unit = updateDto.Unit ?? "Kg";
 
             await _context.SaveChangesAsync();
             return Ok(material);

@@ -7,6 +7,7 @@ interface RawMaterial {
   name: string;
   stockKg: number;
   minimumStockAlert: number;
+  unit?: string;
 }
 
 interface CriticalStockListProps {
@@ -52,14 +53,14 @@ export default function CriticalStockList({ rawMaterials }: CriticalStockListPro
                       style={{ width: `${Math.min((item.stockKg / item.minimumStockAlert) * 100, 100)}%` }}
                     />
                   </div>
-                  <span className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Kritik Eşik: {item.minimumStockAlert} Kg</span>
+                  <span className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Kritik Eşik: {item.minimumStockAlert} {item.unit || "Kg"}</span>
                 </div>
               </div>
               <div className="text-right">
                 <span className="text-lg font-black text-rose-400 drop-shadow-[0_0_5px_rgba(244,63,94,0.4)]">
                   {item.stockKg.toLocaleString('tr-TR')}
                 </span>
-                <span className="text-xs text-rose-500/80 ml-1">Kg</span>
+                <span className="text-xs text-rose-500/80 ml-1">{item.unit || "Kg"}</span>
               </div>
             </div>
           ))

@@ -14,6 +14,7 @@ interface RawMaterial {
   stockKg: number;
   minimumStockAlert: number;
   category: string;
+  unit?: string;
   createdAt?: string;
   createdBy?: string;
   updatedAt?: string;
@@ -55,6 +56,7 @@ export default function HammaddePage() {
     stockAmount: "",
     criticalStockLevel: "",
     category: "Granül",
+    unit: "Kg",
   });
 
   const fetchMaterials = async () => {
@@ -140,6 +142,7 @@ export default function HammaddePage() {
       stockAmount: material.stockKg.toString(),
       criticalStockLevel: material.minimumStockAlert.toString(),
       category: material.category || "Granül",
+      unit: material.unit || "Kg",
     });
     setIsModalOpen(true);
   };
@@ -155,8 +158,8 @@ export default function HammaddePage() {
         : "http://localhost:5257/api/RawMaterials";
       const method = editingId ? "PUT" : "POST";
       const payload: any = editingId
-        ? { id: editingId, name: formData.name, stockKg: Number(formData.stockAmount) || 0, minimumStockAlert: Number(formData.criticalStockLevel) || 0, category: formData.category }
-        : { name: formData.name, stockKg: Number(formData.stockAmount) || 0, minimumStockAlert: Number(formData.criticalStockLevel) || 0, category: formData.category };
+        ? { id: editingId, name: formData.name, stockKg: Number(formData.stockAmount) || 0, minimumStockAlert: Number(formData.criticalStockLevel) || 0, category: formData.category, unit: formData.unit }
+        : { name: formData.name, stockKg: Number(formData.stockAmount) || 0, minimumStockAlert: Number(formData.criticalStockLevel) || 0, category: formData.category, unit: formData.unit };
 
       const response = await authFetch(url, {
         method,
@@ -218,7 +221,7 @@ export default function HammaddePage() {
     if (isSubmitting) return;
     setIsModalOpen(false);
     setEditingId(null);
-    setFormData({ name: "", stockAmount: "", criticalStockLevel: "", category: "Granül" });
+    setFormData({ name: "", stockAmount: "", criticalStockLevel: "", category: "Granül", unit: "Kg" });
   };
 
   return (
@@ -311,8 +314,8 @@ export default function HammaddePage() {
                   {[
                     { key: "name", label: "Hammadde Adı" },
                     { key: "category", label: "Kategori" },
-                    { key: "stockKg", label: "Mevcut Stok (Kg)", right: true },
-                    { key: "minimumStockAlert", label: "Kritik Sınır (Kg)", right: true },
+                    { key: "stockKg", label: "Mevcut Stok", right: true },
+                    { key: "minimumStockAlert", label: "Kritik Sınır", right: true },
                   ].map(col => (
                     <th key={col.key} onClick={() => handleSort(col.key as SortField)}
                       className={`px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer select-none hover:text-cyan-400 transition-colors ${col.right ? "text-right" : ""}`}>
@@ -354,12 +357,12 @@ export default function HammaddePage() {
                         <div className="flex items-center justify-end gap-2">
                           <Scale size={14} className={isCritical ? "text-rose-500/70" : "text-slate-500"} />
                           <span className={`text-sm font-semibold ${isCritical ? "text-rose-400" : "text-slate-200"}`}>
-                            {(material.stockKg || 0).toLocaleString("tr-TR")}
+                            {(material.stockKg || 0).toLocaleString("tr-TR")} {material.unit || "Kg"}
                           </span>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <span className="text-sm font-medium text-slate-400">{(material.minimumStockAlert || 0).toLocaleString("tr-TR")}</span>
+                        <span className="text-sm font-medium text-slate-400">{(material.minimumStockAlert || 0).toLocaleString("tr-TR")} {material.unit || "Kg"}</span>
                       </td>
                       <td className="px-6 py-4 text-center">
                         {isCritical ? (
@@ -465,7 +468,19 @@ export default function HammaddePage() {
                 </select>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-300">Başlangıç Stoğu (Kg) <span className="text-rose-500">*</span></label>
+                <label className="text-sm font-medium text-slate-300">Ölçü Birimi <span className="text-rose-500">*</span></label>
+                <select name="unit" required value={formData.unit} onChange={(e: any) => setFormData(p => ({ ...p, unit: e.target.value }))}
+                  className="w-full bg-[#0A0A0A] border border-[#333] rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 appearance-none transition-all cursor-pointer">
+                  <option value="Kg">Kg</option>
+                  <option value="Litre">Litre</option>
+                  <option value="Adet">Adet</option>
+                  <option value="Rulo">Rulo</option>
+                  <option value="Gram">Gram</option>
+                  <option value="Kutu">Kutu</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-300">Başlangıç Stoğu <span className="text-rose-500">*</span></label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><Scale size={16} className="text-slate-500" /></div>
                   <input type="number" name="stockAmount" required min="0" step="0.01" value={formData.stockAmount} onChange={handleInputChange} onKeyDown={preventInvalidNumberInput}
@@ -474,7 +489,7 @@ export default function HammaddePage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-300">Kritik Stok Sınırı (Kg) <span className="text-rose-500">*</span></label>
+                <label className="text-sm font-medium text-slate-300">Kritik Stok Sınırı <span className="text-rose-500">*</span></label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><AlertCircle size={16} className="text-slate-500" /></div>
                   <input type="number" name="criticalStockLevel" required min="0" step="0.01" value={formData.criticalStockLevel} onChange={handleInputChange} onKeyDown={preventInvalidNumberInput}
