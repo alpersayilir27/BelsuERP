@@ -65,7 +65,8 @@ public class OrdersController : ControllerBase
                 o.CreatedBy,
                 o.CreatedAt,
                 o.UpdatedBy,
-                o.UpdatedAt
+                o.UpdatedAt,
+                o.DeliveredBy
             })
             .ToListAsync();
             

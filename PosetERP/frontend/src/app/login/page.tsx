@@ -54,7 +54,7 @@ export default function LoginPage() {
 
       {/* Login Card */}
       <div className="w-full max-w-md p-8 rounded-3xl bg-[#111111]/80 backdrop-blur-xl border border-white/10 shadow-[0_0_50px_rgba(6,182,212,0.1)] relative z-10 group overflow-hidden">
-        
+
         {/* Animated border glow on hover/focus */}
         <div className="absolute -inset-[1px] bg-gradient-to-r from-cyan-400 via-violet-500 to-emerald-400 opacity-0 group-hover:opacity-20 transition-opacity duration-1000 -z-10 rounded-3xl" />
 
@@ -62,7 +62,7 @@ export default function LoginPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-black/50 border border-white/10 mb-6 shadow-[0_0_20px_rgba(255,255,255,0.05)]">
             <Lock className="w-8 h-8 text-cyan-400" />
           </div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">Mini-ERP Login</h1>
+          <h1 className="text-3xl font-bold text-white tracking-tight">Belsu-ERP Login</h1>
           <p className="text-slate-400 mt-2 text-sm">Devam etmek için giriş yapınız.</p>
         </div>
 
@@ -110,7 +110,7 @@ export default function LoginPage() {
           >
             {/* Shimmer effect */}
             <div className="absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-white opacity-20 group-hover/btn:animate-shimmer" />
-            
+
             {isLoading ? (
               <Loader2 className="w-6 h-6 animate-spin" />
             ) : (

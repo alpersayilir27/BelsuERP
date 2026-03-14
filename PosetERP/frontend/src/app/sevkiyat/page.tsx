@@ -64,6 +64,17 @@ export default function SevkiyatPage() {
     }
   };
 
+  const formatDateTime = (dateStr?: string) => {
+    if (!dateStr) return "-";
+    return new Date(dateStr).toLocaleString("tr-TR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   useEffect(() => {
     fetchCompletedOrders();
   }, []);
@@ -233,7 +244,7 @@ export default function SevkiyatPage() {
                       <td className="px-6 py-4 text-sm text-right font-semibold text-slate-200">{order.requestedAmountKg.toLocaleString('tr-TR')} Kg</td>
                       <td className="px-6 py-4 text-sm text-right font-bold text-emerald-400">₺{(order.totalPrice || 0).toLocaleString('tr-TR')}</td>
                       <td className="px-6 py-4 text-sm text-center text-slate-400">
-                        {order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString('tr-TR') : '-'}
+                        {formatDateTime(order.deliveryDate)}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2 text-sm text-slate-300">
@@ -273,7 +284,7 @@ export default function SevkiyatPage() {
                           </span>
                         ) : (
                           <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                            {order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString('tr-TR') : 'Arşivlendi'}
+                            {order.deliveryDate ? formatDateTime(order.deliveryDate) : 'Arşivlendi'}
                           </span>
                         )}
                       </div>
@@ -389,8 +400,7 @@ export default function SevkiyatPage() {
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-slate-500 uppercase tracking-widest font-semibold mb-1">Teslimat Tarihi</p>
-                  <p className="text-white font-medium">{new Date().toLocaleDateString('tr-TR')}</p>
-                  <p className="text-xs text-slate-400 mt-1">{new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</p>
+                  <p className="text-white font-medium">{formatDateTime(new Date().toISOString())}</p>
                 </div>
               </div>
 
