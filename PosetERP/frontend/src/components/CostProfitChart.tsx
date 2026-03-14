@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
 interface Order {
   status: number | string;
@@ -18,11 +18,14 @@ interface CostProfitChartProps {
 export default function CostProfitChart({ orders }: CostProfitChartProps) {
   const chartData = useMemo(() => {
     const monthlyData = orders.reduce((acc: Record<string, any>, order) => {
-      // Sadece tamamlanmış/sevk edilmiş siparişleri kâr hesabına dahil et
-      const isCompleted = order.status === 2 || order.status === 3 || order.status === 'Completed' || order.status === 'Shipped';
+      // Sadece tamamlanmı/sevk edilmiş/teslim edilmiş siparişleri kâr hesabına dahil et
+      const isCompleted = order.status === 2 || order.status === 3 || order.status === 4 || 
+                         order.status === 'Completed' || order.status === 'Shipped' || order.status === 'Delivered';
       if (!isCompleted) return acc;
       
-      const d = new Date(order.orderDate);
+      const orderDate = (order as any).orderDate || (order as any).OrderDate;
+      const d = new Date(orderDate);
+      if (isNaN(d.getTime())) return acc;
       const m = d.toLocaleString('tr-TR', { month: 'short' });
       const y = d.getFullYear();
       const label = `${m} ${y}`;
@@ -37,9 +40,15 @@ export default function CostProfitChart({ orders }: CostProfitChartProps) {
         };
       }
       
-      acc[label].ciro += (order.totalPrice || 0);
-      acc[label].maliyet += (order.totalCost || 0);
-      acc[label].kar += (order.netProfit || 0);
+      const ciro = Number((order as any).totalPrice || (order as any).TotalPrice || 0);
+      const maliyet = Number((order as any).totalCost || (order as any).TotalCost || (order as any).estimatedCost || (order as any).EstimatedCost || 0);
+      const kar = (order as any).netProfit !== undefined || (order as any).NetProfit !== undefined 
+                  ? Number((order as any).netProfit ?? (order as any).NetProfit) 
+                  : (ciro - maliyet);
+
+      acc[label].ciro += ciro;
+      acc[label].maliyet += maliyet;
+      acc[label].kar += kar;
       
       return acc;
     }, {});
@@ -71,11 +80,11 @@ export default function CostProfitChart({ orders }: CostProfitChartProps) {
             {payload.map((entry: any, index: number) => (
               <div key={index} className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color, boxShadow: `0 0 8px ${entry.color}` }} />
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.fill || entry.color, boxShadow: `0 0 8px ${entry.fill || entry.color}` }} />
                   <span className="text-slate-400 text-xs font-medium">{entry.name}</span>
                 </div>
                 <span className="text-white text-xs font-bold font-mono">
-                  {entry.value.toLocaleString('tr-TR')} ₺
+                  {Number(entry.value).toLocaleString('tr-TR')} ₺
                 </span>
               </div>
             ))}
@@ -97,24 +106,11 @@ export default function CostProfitChart({ orders }: CostProfitChartProps) {
       
       <div className="h-[280px] w-full relative z-10">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart
+          <BarChart
             data={chartData}
             margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+            barGap={8}
           >
-            <defs>
-              <linearGradient id="colorCiro" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.6}/>
-                <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
-              </linearGradient>
-              <linearGradient id="colorMaliyet" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.6}/>
-                <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
-              </linearGradient>
-              <linearGradient id="colorKar" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.6}/>
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-              </linearGradient>
-            </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
             <XAxis 
               dataKey="month" 
@@ -127,45 +123,36 @@ export default function CostProfitChart({ orders }: CostProfitChartProps) {
             <YAxis 
               stroke="#555" 
               fontSize={11} 
-              tickLine={false}
+              tickLine={false} 
               axisLine={false}
               tickFormatter={(value) => `${value >= 1000 ? (value / 1000).toFixed(0) + 'k' : value}`}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: '#1a1a1a' }} />
             <Legend 
               verticalAlign="top" 
               height={36} 
               iconType="circle"
               wrapperStyle={{ fontSize: '12px', color: '#94a3b8' }}
             />
-            <Area 
-              type="monotoneX" 
+            <Bar 
               dataKey="Ciro" 
-              stroke="#06b6d4" 
-              strokeWidth={3}
-              fillOpacity={1} 
-              fill="url(#colorCiro)" 
-              activeDot={{ r: 8, strokeWidth: 0, fill: '#06b6d4', style: { filter: 'drop-shadow(0 0 10px rgba(6,182,212,0.8))' } }}
+              fill="#06b6d4" 
+              radius={[4, 4, 0, 0]}
+              className="drop-shadow-[0_0_8px_rgba(6,182,212,0.3)]"
             />
-            <Area 
-              type="monotoneX" 
+            <Bar 
               dataKey="Maliyet" 
-              stroke="#f43f5e" 
-              strokeWidth={3}
-              fillOpacity={1} 
-              fill="url(#colorMaliyet)" 
-              activeDot={{ r: 8, strokeWidth: 0, fill: '#f43f5e', style: { filter: 'drop-shadow(0 0 10px rgba(244,63,94,0.8))' } }}
+              fill="#f43f5e" 
+              radius={[4, 4, 0, 0]}
+              className="drop-shadow-[0_0_8px_rgba(244,63,94,0.3)]"
             />
-            <Area 
-              type="monotoneX" 
+            <Bar 
               dataKey="Net Kâr" 
-              stroke="#10b981" 
-              strokeWidth={3}
-              fillOpacity={1} 
-              fill="url(#colorKar)" 
-              activeDot={{ r: 8, strokeWidth: 0, fill: '#10b981', style: { filter: 'drop-shadow(0 0 10px rgba(16,185,129,0.8))' } }}
+              fill="#10b981" 
+              radius={[4, 4, 0, 0]}
+              className="drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]"
             />
-          </AreaChart>
+          </BarChart>
         </ResponsiveContainer>
       </div>
     </div>

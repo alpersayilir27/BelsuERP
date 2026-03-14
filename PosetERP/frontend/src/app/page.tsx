@@ -49,15 +49,26 @@ export default function DashboardPage() {
           fetchApi<any>('/Production').catch(() => [])
         ]);
 
-        const extractArray = (res: any) => Array.isArray(res) ? res : (res?.data || res?.items || []);
+        const extractArray = (res: any) => Array.isArray(res) ? res : (res?.Items || res?.data || res?.items || []);
         
         const orders = extractArray(ordersRes);
         const customers = extractArray(customersRes);
-        const rawMaterials = extractArray(rawMaterialsRes);
+        const rawMaterials = (extractArray(rawMaterialsRes)).map((m: any) => ({
+          id: m.id || m.Id,
+          name: m.name || m.Name || "Bilinmiyor",
+          stockKg: Number(m.stockKg ?? m.StockKg ?? 0),
+          minimumStockAlert: Number(m.minimumStockAlert ?? m.MinimumStockAlert ?? 0)
+        }));
         const productions = extractArray(productionRes);
 
         const pendingOrders = orders.filter((o: any) => o.status === 0 || o.status === 'Pending').length;
-        const totalProfit = orders.reduce((sum: number, o: any) => sum + ((o.totalPrice || 0) - (o.totalCost || 0)), 0);
+        const totalProfit = orders
+          .filter((o: any) => o.status === 2 || o.status === 3 || o.status === 4 || o.status === 'Completed' || o.status === 'Shipped' || o.status === 'Delivered')
+          .reduce((sum: number, o: any) => {
+            const price = Number(o.totalPrice ?? o.TotalPrice ?? 0);
+            const cost = Number(o.totalCost ?? o.TotalCost ?? o.estimatedCost ?? o.EstimatedCost ?? 0);
+            return sum + (price - cost);
+          }, 0);
         const criticalStocks = rawMaterials.filter((m: any) => m.stockKg < m.minimumStockAlert).length;
         const activeProductions = orders.filter((o: any) => o.status === 1 || o.status === 'InProduction').length;
 
@@ -141,6 +152,12 @@ export default function DashboardPage() {
       case 3:
       case 'Shipped':
         return { text: 'Sevk Edildi', classes: 'bg-blue-400/10 text-blue-400 border-blue-400/20 shadow-[0_0_10px_rgba(96,165,250,0.1)]', dot: 'bg-blue-400 shadow-[0_0_5px_rgba(96,165,250,0.8)]' };
+      case 4:
+      case 'Delivered':
+        return { text: 'Teslim Edildi', classes: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.1)]', dot: 'bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.8)]' };
+      case 5:
+      case 'Cancelled':
+        return { text: 'İptal Edildi', classes: 'bg-rose-400/10 text-rose-400 border-rose-400/20 shadow-[0_0_10px_rgba(251,113,133,0.1)]', dot: 'bg-rose-400 shadow-[0_0_5px_rgba(251,113,133,0.8)]' };
       default:
         return { text: 'Bilinmiyor', classes: 'bg-gray-400/10 text-gray-400 border-gray-400/20', dot: 'bg-gray-400' };
     }
