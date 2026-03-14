@@ -191,7 +191,7 @@ export default function HammaddePage() {
     try {
       setIsDeleting(true);
       const response = await authFetch(`http://localhost:5257/api/RawMaterials/${deleteTarget.id}`, { method: "DELETE" });
-      
+
       if (!response.ok) {
         let errorMsg = "Hammadde silinirken bir hata oluştu.";
         try {
@@ -206,7 +206,7 @@ export default function HammaddePage() {
         }
         throw new Error(errorMsg);
       }
-      
+
       await fetchMaterials();
       setDeleteTarget(null);
       toast({ type: "success", title: "Silme İşlemi Başarılı", message: `'${deleteTarget.name}' listeden kaldırıldı.` });
@@ -464,6 +464,10 @@ export default function HammaddePage() {
                   className="w-full bg-[#0A0A0A] border border-[#333] rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 appearance-none transition-all cursor-pointer">
                   <option value="Granül">Granül</option>
                   <option value="Boya">Boya</option>
+                  <option value="Katkı Maddesi">Katkı Maddesi</option>
+                  <option value="Ambalaj / Paketleme">Ambalaj / Paketleme</option>
+                  <option value="Sarf Malzeme">Sarf Malzeme</option>
+                  <option value="Yedek Parça">Yedek Parça</option>
                   <option value="Diğer">Diğer</option>
                 </select>
               </div>
