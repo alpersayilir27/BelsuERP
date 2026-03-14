@@ -35,7 +35,7 @@ export default function TedarikcilerPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  
+
   const [formData, setFormData] = useState({
     companyName: "",
     contactPerson: "",
@@ -192,7 +192,7 @@ export default function TedarikcilerPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      
+
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 bg-[#111111] p-6 rounded-2xl border border-[#222] shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 blur-[80px] rounded-full pointer-events-none" />
@@ -205,8 +205,8 @@ export default function TedarikcilerPage() {
           </div>
           <p className="text-slate-400">Hammadde sağlayıcılarınızı ve tedarikçi firmalarınızı yönetin.</p>
         </div>
-        
-        <button 
+
+        <button
           onClick={() => handleOpenModal()}
           className="group relative px-6 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 font-medium rounded-xl border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)] hover:shadow-[0_0_25px_rgba(6,182,212,0.3)] transition-all duration-300 flex items-center gap-2 overflow-hidden"
         >
@@ -369,13 +369,13 @@ export default function TedarikcilerPage() {
                     required
                     maxLength={200}
                     value={formData.companyName}
-                    onChange={(e) => setFormData({...formData, companyName: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
                     className="w-full bg-[#0A0A0A] border border-[#333] rounded-xl py-2.5 pl-10 pr-4 text-slate-200 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all"
-                    placeholder="Firma ünvanı"
+                    placeholder="Firma İsmi"
                   />
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-xs font-medium text-slate-400 uppercase tracking-widest mb-2">İletişim Kişisi (Yetkili)</label>
                 <div className="relative group">
@@ -384,13 +384,13 @@ export default function TedarikcilerPage() {
                     type="text"
                     maxLength={150}
                     value={formData.contactPerson}
-                    onChange={(e) => setFormData({...formData, contactPerson: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, contactPerson: e.target.value })}
                     className="w-full bg-[#0A0A0A] border border-[#333] rounded-xl py-2.5 pl-10 pr-4 text-slate-200 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all"
                     placeholder="Yetkili Adı Soyadı"
                   />
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-xs font-medium text-slate-400 uppercase tracking-widest mb-2">Telefon</label>
                 <div className="relative group">
@@ -399,7 +399,7 @@ export default function TedarikcilerPage() {
                     type="text"
                     maxLength={50}
                     value={formData.phoneNumber}
-                    onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
                     className="w-full bg-[#0A0A0A] border border-[#333] rounded-xl py-2.5 pl-10 pr-4 font-mono text-slate-200 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all"
                     placeholder="+90 555 123 4567"
                   />
@@ -413,7 +413,7 @@ export default function TedarikcilerPage() {
                   <input
                     type="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="w-full bg-[#0A0A0A] border border-[#333] rounded-xl py-2.5 pl-10 pr-4 text-slate-200 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all"
                     placeholder="info@firma.com"
                   />
@@ -443,33 +443,33 @@ export default function TedarikcilerPage() {
       {/* DELETE MODAL */}
       {isDeleteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-           <div className="absolute inset-0 bg-[#050505]/80 backdrop-blur-md" onClick={() => setIsDeleteModalOpen(false)} />
-           <div className="relative bg-[#111111] border border-[#222] rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200">
-             <div className="h-1 bg-gradient-to-r from-transparent via-rose-500 to-transparent opacity-50" />
-             <div className="p-6">
-                <div className="w-12 h-12 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mb-4 mx-auto">
-                    <AlertCircle className="text-rose-500" size={24} />
-                </div>
-                <h3 className="text-xl font-bold text-white text-center mb-2">Tedarikçi Silinecek</h3>
-                <p className="text-slate-400 text-center text-sm mb-6">
-                    Bu tedarikçiyi listeden kaldırmak istediğinize emin misiniz? Bu işlem geri alınamaz.
-                </p>
-                <div className="flex gap-3">
-                    <button
-                        onClick={() => setIsDeleteModalOpen(false)}
-                        className="flex-1 px-4 py-2.5 bg-[#1A1A1A] hover:bg-[#222] text-slate-300 font-medium rounded-xl border border-[#333] transition-colors"
-                    >
-                        İptal
-                    </button>
-                    <button
-                        onClick={handleDelete}
-                        className="flex-1 px-4 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-medium rounded-xl border border-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.3)] transition-all"
-                    >
-                        Sil
-                    </button>
-                </div>
-             </div>
-           </div>
+          <div className="absolute inset-0 bg-[#050505]/80 backdrop-blur-md" onClick={() => setIsDeleteModalOpen(false)} />
+          <div className="relative bg-[#111111] border border-[#222] rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="h-1 bg-gradient-to-r from-transparent via-rose-500 to-transparent opacity-50" />
+            <div className="p-6">
+              <div className="w-12 h-12 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mb-4 mx-auto">
+                <AlertCircle className="text-rose-500" size={24} />
+              </div>
+              <h3 className="text-xl font-bold text-white text-center mb-2">Tedarikçi Silinecek</h3>
+              <p className="text-slate-400 text-center text-sm mb-6">
+                Bu tedarikçiyi listeden kaldırmak istediğinize emin misiniz? Bu işlem geri alınamaz.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setIsDeleteModalOpen(false)}
+                  className="flex-1 px-4 py-2.5 bg-[#1A1A1A] hover:bg-[#222] text-slate-300 font-medium rounded-xl border border-[#333] transition-colors"
+                >
+                  İptal
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="flex-1 px-4 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-medium rounded-xl border border-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.3)] transition-all"
+                >
+                  Sil
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

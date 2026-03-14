@@ -36,7 +36,7 @@ export default function MusterilerPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [customerToDelete, setCustomerToDelete] = useState<{id: string, name: string} | null>(null);
+  const [customerToDelete, setCustomerToDelete] = useState<{ id: string, name: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -44,7 +44,7 @@ export default function MusterilerPage() {
     contactPerson: "",
     phoneNumber: "",
   });
-  
+
   const router = useRouter();
 
   const handleSort = (field: SortField) => {
@@ -103,7 +103,7 @@ export default function MusterilerPage() {
       router.push("/uretim");
       return;
     }
-    
+
     fetchCustomers();
   }, [router]);
 
@@ -118,7 +118,7 @@ export default function MusterilerPage() {
 
     try {
       setIsSubmitting(true);
-      
+
       let url = "http://localhost:5257/api/Customers";
       let method = "POST";
       let payload: any = {
@@ -256,13 +256,13 @@ export default function MusterilerPage() {
           <h2 className="text-2xl font-semibold text-white tracking-tight">Müşteriler</h2>
           <p className="text-slate-400 mt-1">Kayıtlı tüm firmaları ve bakiye durumlarını yönetin.</p>
         </div>
-        
+
         <div className="flex items-center gap-3">
-          <ExportButtons 
-            excelUrl="http://localhost:5257/api/Export/excel/customers" 
-            excelFilename={`Musteriler_${new Date().toISOString().split('T')[0]}.xlsx`} 
+          <ExportButtons
+            excelUrl="http://localhost:5257/api/Export/excel/customers"
+            excelFilename={`Musteriler_${new Date().toISOString().split('T')[0]}.xlsx`}
           />
-          <button 
+          <button
             onClick={() => setIsModalOpen(true)}
             className="group relative px-6 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 font-medium rounded-xl border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)] hover:shadow-[0_0_25px_rgba(6,182,212,0.3)] transition-all duration-300 flex items-center gap-2 overflow-hidden"
           >
@@ -430,18 +430,18 @@ export default function MusterilerPage() {
       {/* MODAL */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
-          <div 
+          <div
             className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
             onClick={closeModal}
           />
-          
+
           <div className="relative bg-[#111111] border border-[#222] rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-[#222] bg-[#151515]">
               <h3 className="text-lg font-semibold text-white">
                 {editingId ? "Müşteri Düzenle" : "Yeni Müşteri Ekle"}
               </h3>
-              <button 
+              <button
                 onClick={closeModal}
                 disabled={isSubmitting}
                 className="text-slate-400 hover:text-white transition-colors bg-transparent border-none p-1 rounded-md hover:bg-[#222]"
@@ -468,7 +468,7 @@ export default function MusterilerPage() {
                     value={formData.companyName}
                     onChange={handleInputChange}
                     className="w-full bg-[#0A0A0A] border border-[#333] rounded-xl pl-10 pr-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 focus:shadow-[0_0_15px_rgba(6,182,212,0.2)] transition-all placeholder:text-slate-600"
-                    placeholder="Örn: Vortex Ltd. Şti."
+                    placeholder="Örn: Poshetci Ltd. Şti."
                   />
                 </div>
               </div>
@@ -488,7 +488,7 @@ export default function MusterilerPage() {
                     value={formData.contactPerson}
                     onChange={handleInputChange}
                     className="w-full bg-[#0A0A0A] border border-[#333] rounded-xl pl-10 pr-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 focus:shadow-[0_0_15px_rgba(6,182,212,0.2)] transition-all placeholder:text-slate-600"
-                    placeholder="Örn: Ahmet Yılmaz"
+                    placeholder="Örn: Alper Sayılır"
                   />
                 </div>
               </div>
@@ -546,11 +546,11 @@ export default function MusterilerPage() {
       {/* DELETE CONFIRM MODAL */}
       {isDeleteModalOpen && customerToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
-          <div 
+          <div
             className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
             onClick={() => !isSubmitting && setIsDeleteModalOpen(false)}
           />
-          
+
           <div className="relative bg-[#111111] border border-[#222] rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200">
             <div className="p-6 text-center space-y-4">
               <div className="w-16 h-16 rounded-full bg-rose-500/10 flex items-center justify-center mx-auto border border-rose-500/20 mb-2">
@@ -561,7 +561,7 @@ export default function MusterilerPage() {
                 <span className="text-white font-medium">'{customerToDelete.name}'</span> isimli müşteriyi silmek istediğinize emin misiniz? Bu işlem geri alınamaz.
               </p>
             </div>
-            
+
             <div className="p-4 border-t border-[#222] bg-[#151515] flex items-center gap-3">
               <button
                 type="button"
