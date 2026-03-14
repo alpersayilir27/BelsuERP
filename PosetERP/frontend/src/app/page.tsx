@@ -28,6 +28,7 @@ export default function DashboardPage() {
     rawMaterials: [] as any[],
     allOrders: [] as any[]
   });
+  const [userName, setUserName] = useState<string>("");
   
   const router = useRouter();
   const t = useTranslations("Dashboard");
@@ -39,6 +40,8 @@ export default function DashboardPage() {
       router.push("/uretim");
       return;
     }
+
+    setUserName(localStorage.getItem("userName") || "");
 
     async function loadData() {
       try {
@@ -173,7 +176,9 @@ export default function DashboardPage() {
     <div className="max-w-7xl mx-auto space-y-8">
       {/* Header section */}
       <div>
-        <h2 className="text-2xl font-semibold text-white tracking-tight">{t("welcome")}</h2>
+        <h2 className="text-2xl font-semibold text-white tracking-tight">
+          {t("welcome")}{userName ? `, ${userName}` : ""}
+        </h2>
         <p className="text-slate-400 mt-1">{t("subtitle")}</p>
       </div>
 

@@ -12,7 +12,7 @@
     "logout": "Logout"
   },
   "Dashboard": {
-    "welcome": "Welcome, Alper",
+    "welcome": "Welcome",
     "subtitle": "Today's general status of your business.",
     "pendingOrders": "Pending Orders",
     "criticalStock": "Critical Stock",

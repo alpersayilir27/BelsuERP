@@ -12,10 +12,10 @@
     "logout": "Çıkış Yap"
   },
   "Dashboard": {
-    "welcome": "Hoş Geldiniz, Alper",
+    "welcome": "Hoş Geldiniz",
     "subtitle": "İşletmenizin bugünkü genel durumu.",
     "pendingOrders": "Bekleyen Siparişler",
-    "criticalStock": "Kritik Stok (Çeşit)",
+    "criticalStock": "Kritik Hammadde Stoğu",
     "totalRevenue": "Toplam Ciro",
     "activeProduction": "Aktif Üretim",
     "recentOrders": "Son Siparişler",

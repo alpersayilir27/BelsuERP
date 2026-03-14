@@ -102,7 +102,7 @@ public class RawMaterialsController : ControllerBase
                 return NotFound();
             }
 
-            // Hammaddenin kullanılıp kullanılmadığını kontrol et
+            // Hammaddenin kullanılıp kullanılmadığını kontrol et (Ön kontrol)
             var isUsedInProduction = await _context.ProductionStages.AnyAsync(ps => ps.RawMaterialId == id);
             if (isUsedInProduction)
             {
@@ -118,6 +118,11 @@ public class RawMaterialsController : ControllerBase
             _context.RawMaterials.Remove(material);
             await _context.SaveChangesAsync();
             return NoContent();
+        }
+        catch (DbUpdateException)
+        {
+            // Eğer veritabanı seviyesinde bir kısıtlamaya takılırsa (Constraint Error)
+            return BadRequest("Bu hammadde üretim veya satın alma geçmişinde kullanıldığı için silinemez.");
         }
         catch (Exception ex)
         {

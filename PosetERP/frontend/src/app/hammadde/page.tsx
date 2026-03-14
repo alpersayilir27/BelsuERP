@@ -190,8 +190,18 @@ export default function HammaddePage() {
       const response = await authFetch(`http://localhost:5257/api/RawMaterials/${deleteTarget.id}`, { method: "DELETE" });
       
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || "Hammadde silinirken bir hata oluştu.");
+        let errorMsg = "Hammadde silinirken bir hata oluştu.";
+        try {
+          // Yanıtı klonluyoruz çünkü okunduğunda stream boşalır
+          const responseClone = response.clone();
+          const errorData = await responseClone.json();
+          errorMsg = errorData.error || errorData.Error || errorData.message || errorData.Message || errorMsg;
+        } catch {
+          // JSON değilse text olarak oku
+          const errorText = await response.text();
+          if (errorText) errorMsg = errorText;
+        }
+        throw new Error(errorMsg);
       }
       
       await fetchMaterials();
